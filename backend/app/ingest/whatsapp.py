@@ -78,9 +78,39 @@ async def evolution_webhook(request: Request) -> dict:
     msg = data.get("message") or {}
     kind = next((k for k in MEDIA_TYPES if k in msg), None)
     if not kind:
-        return {"status": "ignored", "reason": "sin adjunto"}  # texto: lo atiende el agente (Fase 5)
+        text = (msg.get("conversation")
+                or (msg.get("extendedTextMessage") or {}).get("text")
+                or "").strip()
+        if not text:
+            return {"status": "ignored", "reason": "mensaje sin texto ni adjunto"}
+        return await run_in_threadpool(_handle_text, key, text)
 
     return await run_in_threadpool(_handle_media, data, key, msg, kind)
+
+
+def _handle_text(key: dict, text: str) -> dict:
+    """Texto de WhatsApp → agente conversacional → responde por Evolution."""
+    from app.agent.routes import AgentMessageIn, _run as agent_run
+    from app.notifications.whatsapp import send_text
+
+    jid = key.get("remoteJid", "")
+    phone = jid.split("@")[0]
+    try:
+        reply = agent_run(AgentMessageIn(
+            phone=phone, channel="whatsapp", external_id=jid, message=text,
+        ))
+    except HTTPException as e:
+        if e.status_code == 404:
+            log.warning("whatsapp_text_unknown_sender", jid=jid)
+            return {"status": "ignored", "reason": "remitente no registrado"}
+        raise
+    send_result = send_text(phone, reply.text)
+    return {
+        "status": "answered",
+        "conversation_id": reply.conversation_id,
+        "escalated": reply.escalated,
+        "sent": send_result.get("ok", False),
+    }
 
 
 def _handle_media(data: dict, key: dict, msg: dict, kind: str) -> dict:

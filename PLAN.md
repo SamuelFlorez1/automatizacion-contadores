@@ -85,16 +85,18 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 5 — Agente WhatsApp + n8n
+## Fase 5 — Agente WhatsApp + n8n ✅
 
-- [ ] `agent/tools.py`: `get_pending_invoices`, `get_tax_obligations`, `get_missing_documents`, `search_document`, `escalate_to_human`
-- [ ] `agent/loop.py`: Claude Sonnet 5 tool-use loop
-- [ ] `POST /agent/message` — identifica cliente por teléfono, corre agente, guarda mensajes
-- [ ] `notifications/whatsapp.py`: envío vía Evolution
-- [ ] Flujos n8n exportados: `whatsapp-ingest.json`, `tax-reminders.json`, `monthly-reports.json`
-- [ ] Cron n8n dispara recordatorios de vencimiento
+- [x] `agent/tools.py`: `get_pending_invoices`, `get_tax_obligations`, `get_missing_documents`, `search_document`, `escalate_to_human`
+- [x] `agent/loop.py`: Claude Sonnet 5 tool-use loop (`MAX_ITERS=10`, persistencia por turno)
+- [x] `POST /agent/message` — identifica cliente por teléfono, corre agente, guarda mensajes
+- [x] `notifications/whatsapp.py`: envío vía Evolution (fallback log-only sin credenciales)
+- [x] Flujos n8n exportados: `whatsapp-ingest.json`, `tax-reminders.json`, `monthly-reports.json`
+- [x] Cron n8n dispara recordatorios de vencimiento (`POST /notifications/reminders/run`)
+- [x] Webhook Evolution atiende texto → agente → responde (además del media de Fase 2)
+- [x] Tests: 12 nuevos (schemas, tools, loop mockeado, reminders). Total repo: 72.
 
-**Entrega**: cliente pregunta por WhatsApp → agente responde correcto usando datos reales; cron envía recordatorio de IVA próximo a vencer.
+**Entrega**: cliente pregunta por WhatsApp → agente responde correcto usando datos reales; cron envía recordatorio de IVA próximo a vencer. Bitácora: `docs/phases/phase-5.md`.
 
 ---
 

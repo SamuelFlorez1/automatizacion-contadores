@@ -1,0 +1,61 @@
+{
+  "name": "WhatsApp ingest (Evolution → backend)",
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "evolution-inbound",
+        "responseMode": "responseNode",
+        "options": {
+          "rawBody": true
+        }
+      },
+      "id": "webhook-inbound",
+      "name": "Webhook Evolution",
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.API_BASE}}/webhooks/evolution",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "content-type", "value": "application/json"},
+            {"name": "x-signature", "value": "={{$json.headers['x-signature']}}"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "raw",
+        "rawContentType": "application/json",
+        "body": "={{$json.body}}",
+        "options": {"timeout": 30000, "response": {"response": {"neverError": true}}}
+      },
+      "id": "forward-backend",
+      "name": "Forward → backend",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "respondWith": "json",
+        "responseBody": "={{$json}}"
+      },
+      "id": "respond",
+      "name": "Respond",
+      "type": "n8n-nodes-base.respondToWebhook",
+      "typeVersion": 1,
+      "position": [800, 300]
+    }
+  ],
+  "connections": {
+    "Webhook Evolution": {"main": [[{"node": "Forward → backend", "type": "main", "index": 0}]]},
+    "Forward → backend": {"main": [[{"node": "Respond", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1"},
+  "tags": ["fase-5", "whatsapp"]
+}

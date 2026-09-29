@@ -1,0 +1,48 @@
+{
+  "name": "Tax reminders (cron diario)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {
+          "interval": [
+            {"field": "cronExpression", "expression": "0 8 * * *"}
+          ]
+        }
+      },
+      "id": "cron",
+      "name": "Cron 8am Bogotá",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{$env.API_BASE}}/notifications/reminders/run",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "x-cron-secret", "value": "={{$env.CRON_SECRET}}"},
+            {"name": "content-type", "value": "application/json"}
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "raw",
+        "rawContentType": "application/json",
+        "body": "{}",
+        "options": {"timeout": 60000}
+      },
+      "id": "call-backend",
+      "name": "POST /notifications/reminders/run",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [500, 300]
+    }
+  ],
+  "connections": {
+    "Cron 8am Bogotá": {"main": [[{"node": "POST /notifications/reminders/run", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1", "timezone": "America/Bogota"},
+  "tags": ["fase-5", "cron", "tax"]
+}

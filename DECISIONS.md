@@ -73,5 +73,17 @@ Formato:
 **Alternativas**: pedir al usuario que registre retenciones antes de conciliar (más correcto, pero rompe la demo).
 **Consecuencias**: match rate real (Andina 14/19) usable para demo; Fase 4 podrá derivar retenciones del delta cuando exista.
 
+## 2026-09-28 — Agente WhatsApp: tool-use loop simple con tope duro
+**Contexto**: Fase 5 necesita un agente que responda por WhatsApp con datos reales sin caer en bucles ni cruzar clientes.
+**Decisión**: loop propio en `agent/loop.py` (no framework externo) con Sonnet 5 + 5 tools + `MAX_ITERS=10`. Cada tool filtra por `client_id` del contexto. Si el modelo agota iteraciones o Anthropic falla, se escala automáticamente (`escalate_to_human` implícito). Sin API key, respuesta fallback y también escala.
+**Alternativas**: LangGraph / Anthropic tool_runner (más ceremonia; no aporta para 5 tools). Guardar bloques `tool_use` completos en `messages` como historial (frágil de rehidratar; los prior_turns se limitan a texto plano).
+**Consecuencias**: si el modelo necesita re-consultar en un turno posterior vuelve a llamar la tool. Aceptable para WhatsApp. `messages.tool_input`/`tool_output` quedan como jsonb para auditoría, no para replay.
+
+## 2026-09-28 — Cron de recordatorios: ventana fija 5/2/0 días, un mensaje por cliente
+**Contexto**: evitar spam al cliente y mantener el cron simple.
+**Decisión**: `run_reminders` solo dispara si `due_date - hoy ∈ {5, 2, 0}`. Todas las obligaciones que caen ese día para un cliente van en el mismo WhatsApp. n8n corre el job una vez al día 8am America/Bogota.
+**Alternativas**: recordatorio diario para todo lo pendiente (invasivo); tabla `reminder_sent` para deduplicar (aún no necesario).
+**Consecuencias**: si el cron corre dos veces el mismo día el cliente recibe el mensaje dos veces. Agregar tabla de deduplicación cuando escale.
+
 ## 2026-09-28 — Advertencias vs. errores en extracción
 **Decisión**: solo la falta de datos estructurales (número, fecha, NIT, totales, líneas) es error (`status='error'`). Descuadres de totales, DV de NIT inválido, CUFE sintético y todo lo extraído por Vision quedan como advertencias en `invoices.notes` para revisión del contador.

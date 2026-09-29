@@ -1,30 +1,34 @@
 # Estado actual del proyecto
 
 **Última actualización**: 2026-09-28
-**Fase actual**: Fase 4 cerrada ✅ — próxima sesión arranca **Fase 5 (Agente WhatsApp + n8n)**
-**Última sesión**: Fase 4 completa — módulo `tax/` con IVA, rete_fuente, rete/ICA Bogotá, Simple, generador de obligaciones idempotente y 3 endpoints. 60 tests pasan.
+**Fase actual**: Fase 5 cerrada ✅ — próxima sesión arranca **Fase 6 (Reportes PDF)**
+**Última sesión**: Fase 5 completa — agente WhatsApp (5 tools + Sonnet loop), endpoint `/agent/message`, envío Evolution, cron recordatorios, 3 flujos n8n exportados. 72 tests pasan.
 
 ---
 
 ## ¿En qué vamos?
 
-**Fase 4 cerrada.** Ver `docs/phases/phase-4.md`. Endpoints nuevos: `POST /tax/generate/{cid}`, `GET /tax/calculate/{cid}/{period}`, `GET /tax/obligations/{cid}`.
+**Fase 5 cerrada.** Ver `docs/phases/phase-5.md`. Endpoints nuevos:
+- `POST /agent/message` — punto de entrada del agente.
+- `POST /notifications/reminders/run` — cron (header `x-cron-secret`).
+- `POST /notifications/reminders/preview` — vista previa staff (JWT).
 
-Smoke real contra Supabase: Andina (Simple) 12 obligaciones/año ~2.6M COP; Pacífico (Ordinario+agente ret.) 24 obligaciones/año ~17.8M COP. Los rows quedaron en `tax_obligations` porque son datos demo válidos que Fase 5/6 consumirán.
+Webhook `/webhooks/evolution` ahora también responde a mensajes de texto (los deriva al agente y contesta).
 
-**Credenciales en `.env`**: ✅ Anthropic, Supabase. ⏸️ Evolution / n8n (arranca Fase 5).
+**Credenciales en `.env`**: ✅ Anthropic, Supabase. ⏸️ Evolution (`EVOLUTION_API_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCE_NAME`) siguen pendientes. Sin ellas, el envío queda log-only pero el resto del pipeline funciona.
 
-## Próximo paso concreto — arrancar Fase 5
+## Próximo paso concreto — arrancar Fase 6
 
-1. `agent/tools.py` — 5 tools: `get_pending_invoices`, `get_tax_obligations` (usa lo que Fase 4 dejó en DB), `get_missing_documents`, `search_document`, `escalate_to_human`.
-2. `agent/loop.py` — tool-use loop con Sonnet 5 (`claude-sonnet-5`), context en español, límite de 10 iteraciones.
-3. Endpoint `POST /agent/message`: identifica cliente por `phone`, corre agente, persiste `conversations` + `messages` con tokens/latencia.
-4. `notifications/whatsapp.py`: envío vía Evolution API (obtener credenciales primero).
-5. Flujos n8n en `n8n/flows/`: `whatsapp-ingest.json` (ya llega a `/webhooks/evolution` que existe desde Fase 2), `tax-reminders.json` (cron diario que consulta obligaciones vencidas a 5/2/0 días y manda WhatsApp), `monthly-reports.json` (placeholder para Fase 6).
-6. Tests: agente responde con datos reales; formato de tools válido.
-7. Cerrar con STATE/PLAN/phase-5.md + commit `feat(phase-5)`.
+1. `reports/monthly.py` — armar dataset por cliente/período (estado resultados, flujo caja, top gastos, comparativo mes anterior). Reusa lo que Fase 3 clasificó y Fase 4 calculó.
+2. Templates HTML en `reports/templates/` + WeasyPrint (`pip install weasyprint` en el venv; falta instalar).
+3. `reports/iva_form300.py` — prellena Formato 300 DIAN con datos de `tax_obligations` + facturas.
+4. Análisis IA opcional con Sonnet 5: párrafo narrativo al inicio del PDF.
+5. Endpoints `GET /reports/monthly/{cid}/{period}` y `/reports/iva/{cid}/{period}` que devuelven `application/pdf`.
+6. Rellenar el nodo TODO de `n8n/flows/monthly-reports.json` para generar reportes el 1º del mes.
+7. Tests: renderiza sin error, PDF > 0 bytes, campos numéricos coinciden con `tax_obligations`.
+8. Cerrar STATE/PLAN/phase-6.md + commit `feat(phase-6)`.
 
-**Bloqueador que resolver primero**: obtener `EVOLUTION_BASE_URL`, `EVOLUTION_API_KEY` y `EVOLUTION_INSTANCE_ID` del usuario (Hostinger).
+**Preparativo**: instalar WeasyPrint y sus deps de sistema (`brew install pango cairo gdk-pixbuf libffi` en macOS) antes de arrancar.
 
 ## Bootstrap de sesión nueva
 
@@ -37,9 +41,9 @@ git log --oneline -20
 
 ## Bloqueos / esperando algo
 
-- **Fase 5**: Evolution API / n8n credentials pendientes en `.env`.
-- **Deuda**: WeasyPrint no está instalado en el venv local (Fase 6 lo pedirá).
-- **Deuda tax**: Renta PJ/GC y declaración anual Simple no se calculan aún — el calendario ya los tiene, se atacarán en Fase 6 con los reportes anuales.
+- **Fase 6**: WeasyPrint no instalado en el venv local + faltan deps de sistema.
+- **Evolution**: sin credenciales; envío WhatsApp queda log-only. No bloquea Fase 6.
+- **Deuda tax**: Renta PJ/GC y declaración anual Simple aún sin calcular — el calendario ya los tiene, se atacan en Fase 6 junto con los reportes anuales.
 
 ## Usuarios demo (Fase 1)
 
@@ -52,6 +56,7 @@ git log --oneline -20
 
 ## Cambios recientes
 
+- 2026-09-28: **Fase 5 completa.** Agente WhatsApp (5 tools + Sonnet loop, `MAX_ITERS=10`), `/agent/message`, envío Evolution, cron `/notifications/reminders/run`, 3 flujos n8n exportados. 12 tests nuevos (72 total).
 - 2026-09-28: **Fase 4 completa.** IVA/rete_fuente/rete-ICA/ICA Bogotá/Simple, generador idempotente de `tax_obligations`, endpoints `/tax/*`. 17 tests nuevos (60 total).
 - 2026-09-28: **Fase 3 completa.** Clasificación PUC (Haiku + reglas), deducibilidad E.T., parser CSV, motor conciliación. 43 tests.
 - 2026-09-28: **Fase 2 completa.** Parser UBL, Vision, ingesta 3 canales, auth JWKS.

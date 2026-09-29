@@ -1,0 +1,31 @@
+{
+  "name": "Monthly reports (placeholder — Fase 6)",
+  "nodes": [
+    {
+      "parameters": {
+        "rule": {"interval": [{"field": "cronExpression", "expression": "0 7 1 * *"}]}
+      },
+      "id": "cron-month",
+      "name": "1er día del mes 7am",
+      "type": "n8n-nodes-base.scheduleTrigger",
+      "typeVersion": 1,
+      "position": [200, 300]
+    },
+    {
+      "parameters": {
+        "jsCode": "// Placeholder: en Fase 6 se listará clients activos y se disparará\n// POST {API_BASE}/reports/monthly/{client_id}/{period} por cada uno.\nreturn [{json: {status: 'placeholder', message: 'Reports Fase 6 pendiente'}}];"
+      },
+      "id": "todo",
+      "name": "TODO Fase 6",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    }
+  ],
+  "connections": {
+    "1er día del mes 7am": {"main": [[{"node": "TODO Fase 6", "type": "main", "index": 0}]]}
+  },
+  "active": false,
+  "settings": {"executionOrder": "v1", "timezone": "America/Bogota"},
+  "tags": ["fase-6", "cron", "reports"]
+}
