@@ -2,6 +2,9 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
+from app.ingest import email as ingest_email
+from app.ingest import upload as ingest_upload
+from app.ingest import whatsapp as ingest_whatsapp
 
 settings = get_settings()
 
@@ -18,6 +21,10 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+
+app.include_router(ingest_upload.router)
+app.include_router(ingest_email.router)
+app.include_router(ingest_whatsapp.router)
 
 
 @app.get("/health")

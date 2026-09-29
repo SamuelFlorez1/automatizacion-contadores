@@ -44,6 +44,11 @@
       </cac:PartyTaxScheme>
     </cac:Party>
   </cac:AccountingCustomerParty>
+  <cac:PaymentExchangeRate>
+    <cbc:SourceCurrencyCode>USD</cbc:SourceCurrencyCode>
+    <cbc:TargetCurrencyCode>COP</cbc:TargetCurrencyCode>
+    <cbc:CalculationRate>4050.000000</cbc:CalculationRate>
+  </cac:PaymentExchangeRate>
   <cac:TaxTotal>
     <cbc:TaxAmount currencyID="USD">0.00</cbc:TaxAmount>
     <cac:TaxSubtotal>

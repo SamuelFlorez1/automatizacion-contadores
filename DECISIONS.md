@@ -50,3 +50,17 @@ Formato:
 **Contexto**: no tenemos XMLs DIAN reales anonimizados.
 **Decisión**: generar sintéticos válidos siguiendo UBL 2.1.
 **Consecuencias**: 1–2 días extra en Fase 1 para construir el generador correcto. Ventaja: control total sobre casos borde.
+
+## 2026-09-28 — JWT de Supabase validado con JWKS (ES256), no con el secreto HS256
+**Contexto**: el proyecto Supabase firma los access tokens con ES256 (signing keys nuevas); `SUPABASE_JWT_SECRET` (HS256) ya no valida.
+**Decisión**: `app/auth.py` valida contra `/auth/v1/.well-known/jwks.json` (cacheado, se refresca si aparece un `kid` nuevo) y mantiene fallback HS256 por si se usa un proyecto con secreto legado.
+**Consecuencias**: el backend hace una llamada HTTP a Supabase al arrancar el primer request autenticado; no depende de `SUPABASE_JWT_SECRET`.
+
+## 2026-09-28 — Ingesta: originales en Supabase Storage y dedupe por contenido
+**Contexto**: los tres canales (upload, WhatsApp, email) deben ser idempotentes y no perder archivos.
+**Decisión**: todos pasan por `ingest/service.py`: `dedupe_key = sha256(contenido)` único por despacho (el mismo archivo por otro canal es duplicado); el original se sube al bucket privado `documents` (`{firm}/{client}/{sha}/{nombre}`) antes de extraer. Factura duplicada por negocio (emisor+número+dirección, o CUFE) deja el documento en `ignored`. El cliente `client` siempre sube a su propio `client_id`.
+**Alternativas**: dedupe por `messageId` de WhatsApp (no cubre reenvíos ni otros canales).
+**Consecuencias**: `channel_ref` guarda el messageId solo como trazabilidad. Extractos CSV se guardan con status `received`; el parseo es Fase 3.
+
+## 2026-09-28 — Advertencias vs. errores en extracción
+**Decisión**: solo la falta de datos estructurales (número, fecha, NIT, totales, líneas) es error (`status='error'`). Descuadres de totales, DV de NIT inválido, CUFE sintético y todo lo extraído por Vision quedan como advertencias en `invoices.notes` para revisión del contador.

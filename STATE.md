@@ -1,42 +1,26 @@
 # Estado actual del proyecto
 
 **Última actualización**: 2026-09-28
-**Fase actual**: Fase 1 cerrada ✅ — próxima sesión arranca **Fase 2 (Extracción)**
-**Última sesión**: Fase 1 completa — schema aplicado a Supabase, seed corriendo, auth con roles y calendario/PUC cableados.
+**Fase actual**: Fase 2 cerrada ✅ — próxima sesión arranca **Fase 3 (Clasificación + Conciliación)**
+**Última sesión**: Fase 2 completa — extracción XML/Vision, ingesta por upload/WhatsApp/email con idempotencia, HMAC, rate limit y tests.
 
 ---
 
 ## ¿En qué vamos?
 
-**Fase 1 cerrada.** Ver `docs/phases/phase-1.md` para bitácora completa.
+**Fase 2 cerrada.** Ver `docs/phases/phase-2.md`. Endpoints: `POST /ingest/upload` (JWT), `POST /webhooks/evolution` (HMAC), `POST /ingest/email` (secreto). 19 tests pasan.
 
-**Base de datos remoto** (`flwxzcqggtefhxnxxfhy` en `sa-east-1`):
-- 13 tablas creadas con RLS por `firm_id`
-- 1 despacho, 2 clientes (Simple servicios / Ordinario comercio con USD)
-- 53 facturas, 62 líneas, 3 cuentas bancarias, 56 movimientos, 61 documentos
-- 4 usuarios demo (firm_admin, accountant, 2 clientes)
+**Base de datos remoto** (`flwxzcqggtefhxnxxfhy`): seed re-ejecutado (53 facturas, 61 docs, 4 usuarios demo); bucket privado `documents` en Storage creado por la ingesta.
 
-**Credenciales en `.env`**:
-- ✅ Anthropic, Supabase URL/service_role/anon/JWT
-- ✅ `SUPABASE_DB_URL` (postgres directo — usado por migraciones y seed)
-- ⏸️ Evolution API / n8n — se piden en Fase 5
+**Credenciales en `.env`**: ✅ Anthropic, Supabase. ⏸️ Evolution / n8n (Fase 5). Nuevas opcionales: `INGEST_EMAIL_SECRET`, `EVOLUTION_WEBHOOK_SECRET` (vacías = esos canales rechazan todo).
 
-## Próximo paso concreto — arrancar Fase 2 (Extracción)
+## Próximo paso concreto — arrancar Fase 3
 
-Al abrir sesión nueva:
-
-1. Sanity check rápido:
-   - `cd backend && source .venv/bin/activate && python -c "from app.tax.calendar import load_calendar; print(len(load_calendar()['iva_bimestral']['periods']))"`
-   - Login en `https://flwxzcqggtefhxnxxfhy.supabase.co` con cualquier usuario demo para verificar Auth.
-2. Empezar Fase 2:
-   - `backend/app/extraction/xml_ubl.py` — parser DIAN con validación estructural
-   - `backend/app/extraction/validators.py` — dígito NIT (ya está en `seeds/generators.py:nit_dv`, moverlo o reexportar), CUFE, hash duplicados
-   - `backend/app/extraction/vision.py` — Claude Vision con prompt estructurado
-   - `backend/app/ingest/{whatsapp,email,upload}.py` — idempotencia por `dedupe_key`
-   - Firma HMAC en webhook Evolution
-   - Tests unitarios: parser XML, validador NIT, CUFE
-   - Rate limit por cliente/día
-3. Cerrar Fase 2 actualizando este archivo, `PLAN.md`, y creando `docs/phases/phase-2.md`.
+1. `backend/app/classification/puc.py`: Haiku 4.5 con `tax/puc.json` como contexto → `invoices.puc_account`, `classification_confidence`.
+2. `classification/deductibility.py` → `is_deductible`.
+3. `reconciliation/engine.py` (pandas): exact, fuzzy, transferencias internas; `reconciliation_matches`.
+4. `POST /bank/upload`: CSV → normalización → matching. Los CSV subidos por `/ingest/upload` quedan `documents.kind='bank_statement'`, `status='received'`. CSVs del seed en `backend/seeds/bank_statements/`.
+5. Tests del motor de conciliación. Cerrar fase con STATE/PLAN/phase-3.md.
 
 ## Bootstrap de sesión nueva
 
@@ -63,6 +47,7 @@ git log --oneline -20
 
 ## Cambios recientes
 
+- 2026-09-28: **Fase 2 completa.** Parser UBL, Vision, ingesta 3 canales, auth JWKS. Corregido bug de `nit_dv` (residuo 1).
 - 2026-09-28: **Fase 1 completa.** Schema SQL aplicado a Supabase remoto; 53 facturas seed; calendario DIAN 2026 + PUC cableados; usuarios demo con roles vía Supabase Auth.
 - 2026-09-28: `SUPABASE_DB_URL` cargada; migraciones se ejecutan directo con psycopg.
 - 2026-09-26: Fase 0 completa — scaffold monorepo. Ver `docs/phases/phase-0.md`.

@@ -20,7 +20,7 @@
       </cac:PartyName>
       <cac:PartyTaxScheme>
         <cbc:RegistrationName>Papelería Central</cbc:RegistrationName>
-        <cbc:CompanyID schemeID="0" schemeName="31">800150250</cbc:CompanyID>
+        <cbc:CompanyID schemeID="1" schemeName="31">800150250</cbc:CompanyID>
         <cac:TaxScheme>
           <cbc:ID>01</cbc:ID>
           <cbc:Name>IVA</cbc:Name>

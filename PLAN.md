@@ -44,17 +44,17 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 2 — Extracción
+## Fase 2 — Extracción ✅
 
-- [ ] `extraction/xml_ubl.py`: parser DIAN con validación
-- [ ] `extraction/validators.py`: NIT (dígito verificación), CUFE, hash duplicados
-- [ ] `extraction/vision.py`: Claude Vision con prompt estructurado + retorno JSON
-- [ ] `ingest/whatsapp.py`, `ingest/email.py`, `ingest/upload.py` con idempotencia
-- [ ] Firma HMAC en webhook Evolution
-- [ ] Tests: parser XML, validador NIT, CUFE
-- [ ] Rate limit por cliente/día (config)
+- [x] `extraction/xml_ubl.py`: parser DIAN con validación
+- [x] `extraction/validators.py`: NIT (dígito verificación), CUFE, hash duplicados
+- [x] `extraction/vision.py`: Claude Vision con prompt estructurado + retorno JSON
+- [x] `ingest/whatsapp.py`, `ingest/email.py`, `ingest/upload.py` con idempotencia
+- [x] Firma HMAC en webhook Evolution
+- [x] Tests: parser XML, validador NIT, CUFE
+- [x] Rate limit por cliente/día (config)
 
-**Entrega**: subir imagen/PDF/XML por endpoint deja documento en DB con todos los campos extraídos.
+**Entrega**: subir imagen/PDF/XML por endpoint deja documento en DB con todos los campos extraídos. Bitácora: `docs/phases/phase-2.md`.
 
 ---
 

@@ -7,7 +7,7 @@ from pydantic_settings import BaseSettings, SettingsConfigDict
 
 class Settings(BaseSettings):
     model_config = SettingsConfigDict(
-        env_file=".env",
+        env_file=("../.env", ".env"),
         env_file_encoding="utf-8",
         extra="ignore",
     )
@@ -32,6 +32,12 @@ class Settings(BaseSettings):
     evolution_webhook_secret: str = ""
 
     n8n_webhook_base: str = ""
+
+    # Ingesta
+    ingest_max_docs_per_client_day: int = 50
+    ingest_max_file_bytes: int = 10 * 1024 * 1024
+    ingest_email_secret: str = ""
+    storage_bucket: str = "documents"
 
     model_sonnet: str = Field(default="claude-sonnet-5")
     model_haiku: str = Field(default="claude-haiku-4-5-20251001")

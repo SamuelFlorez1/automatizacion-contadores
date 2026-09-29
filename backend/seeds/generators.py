@@ -17,19 +17,7 @@ from PIL import Image, ImageDraw, ImageFont
 # -----------------------------------------------------------------------------
 # NIT dígito de verificación (algoritmo oficial DIAN)
 # -----------------------------------------------------------------------------
-NIT_WEIGHTS = [3, 7, 13, 17, 19, 23, 29, 37, 41, 43, 47, 53, 59, 67, 71]
-
-
-def nit_dv(nit: str) -> int:
-    """Calcula el dígito de verificación de un NIT colombiano."""
-    digits = [int(c) for c in reversed(nit)]
-    total = sum(d * NIT_WEIGHTS[i] for i, d in enumerate(digits))
-    r = total % 11
-    return 0 if r < 2 else 11 - r
-
-
-def validate_nit(nit: str, dv: int) -> bool:
-    return nit_dv(nit) == dv
+from app.extraction.validators import NIT_WEIGHTS, nit_dv, validate_nit  # noqa: E402,F401
 
 
 # -----------------------------------------------------------------------------
@@ -176,6 +164,12 @@ def build_ubl_xml(inv: Invoice) -> bytes:
     _el(ctscheme, CBC + "ID", "01")
     _el(ctscheme, CBC + "Name", "IVA")
 
+    if inv.currency != "COP" and inv.fx_rate_to_cop:
+        fx = _el(root, CAC + "PaymentExchangeRate")
+        _el(fx, CBC + "SourceCurrencyCode", inv.currency)
+        _el(fx, CBC + "TargetCurrencyCode", "COP")
+        _el(fx, CBC + "CalculationRate", f"{inv.fx_rate_to_cop:.6f}")
+
     # Tax total (IVA)
     ttotal = _el(root, CAC + "TaxTotal")
     _el(ttotal, CBC + "TaxAmount", f"{inv.iva:.2f}", currencyID=inv.currency)
@@ -187,6 +181,21 @@ def build_ubl_xml(inv: Invoice) -> bytes:
     tscheme2 = _el(tcat, CAC + "TaxScheme")
     _el(tscheme2, CBC + "ID", "01")
     _el(tscheme2, CBC + "Name", "IVA")
+
+    # Retenciones (05=ReteIVA, 06=ReteFuente, 07=ReteICA)
+    for code, name, amount in (("06", "ReteFuente", inv.rete_fuente), ("07", "ReteICA", inv.rete_ica)):
+        if amount:
+            wt = _el(root, CAC + "WithholdingTaxTotal")
+            _el(wt, CBC + "TaxAmount", f"{amount:.2f}", currencyID=inv.currency)
+            ws = _el(wt, CAC + "TaxSubtotal")
+            _el(ws, CBC + "TaxableAmount", f"{inv.subtotal:.2f}", currencyID=inv.currency)
+            _el(ws, CBC + "TaxAmount", f"{amount:.2f}", currencyID=inv.currency)
+            wc = _el(ws, CAC + "TaxCategory")
+            rate = inv.rete_fuente_rate if code == "06" else inv.rete_ica_rate
+            _el(wc, CBC + "Percent", f"{rate * 100:.2f}")
+            wts = _el(wc, CAC + "TaxScheme")
+            _el(wts, CBC + "ID", code)
+            _el(wts, CBC + "Name", name)
 
     # Monetary total
     mtotal = _el(root, CAC + "LegalMonetaryTotal")
