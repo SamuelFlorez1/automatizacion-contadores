@@ -113,17 +113,17 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 7 — Frontend Next.js
+## Fase 7 — Frontend Next.js ✅
 
-- [ ] Auth con Supabase (login/logout, sesión)
-- [ ] Layout despacho
-- [ ] Vista lista de clientes
-- [ ] Vista cliente: facturas, movimientos, obligaciones
-- [ ] Vista conciliación (matches + revisiones)
-- [ ] Vista reportes (descarga PDF)
-- [ ] Upload manual documentos + CSVs
+- [x] Auth con Supabase (login/logout, sesión) — `@supabase/ssr` + middleware
+- [x] Layout despacho — sidebar + topbar con rol
+- [x] Vista lista de clientes — `/clients`
+- [x] Vista cliente: facturas, movimientos, obligaciones — `/clients/[id]`
+- [x] Vista conciliación (matches + revisiones) — botón corre `/bank/reconcile`
+- [x] Vista reportes (descarga PDF) — mensual + Formulario 300
+- [x] Upload manual documentos + CSVs — `/ingest/upload` + `/bank/upload`
 
-**Entrega**: recorrer toda la demo desde el navegador sin tocar la API directamente.
+**Entrega**: `pnpm dev` abre dashboard; login con seed users → recorre toda la demo. `pnpm build` limpio. Bitácora: `docs/phases/phase-7.md`.
 
 ---
 
