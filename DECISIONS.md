@@ -62,5 +62,16 @@ Formato:
 **Alternativas**: dedupe por `messageId` de WhatsApp (no cubre reenvíos ni otros canales).
 **Consecuencias**: `channel_ref` guarda el messageId solo como trazabilidad. Extractos CSV se guardan con status `received`; el parseo es Fase 3.
 
+## 2026-09-28 — Clasificación PUC con fallback por reglas
+**Contexto**: Haiku 4.5 es económico pero llamarlo por cada factura del seed encarece la iteración y bloquea tests/CI sin `ANTHROPIC_API_KEY`.
+**Decisión**: `classify_invoice` intenta Haiku con tool-use forzado y catálogo filtrado por actividad/dirección; si no hay API key, si Haiku falla, o si devuelve un código fuera del catálogo, cae a un ruteo por 21 regex (`_rule_based`) que cubre el gasto típico del seed (arriendo, servicios públicos, honorarios, mantenimiento, seguros, viajes, mercancía, gastos financieros). Fallback final: cuenta `5195` (diversos) con baja confianza para revisión humana.
+**Consecuencias**: pipeline determinista y testeable offline; el `Classification.source` (`'haiku'`/`'rules'`) queda registrado en `invoices.notes` para auditoría.
+
+## 2026-09-28 — Conciliación: match por referencia tolera retenciones (hasta 25 %)
+**Contexto**: en Colombia el pago bancario suele descontar rete-fuente (2.5–11 %), rete-IVA (15 %) y rete-ICA. Exigir que el monto del extracto = total facturado deja casi todo sin conciliar.
+**Decisión**: si la referencia bancaria contiene el `invoice_number` (o los primeros 20 caracteres del CUFE), se acepta como match `exact` aunque el monto difiera hasta 25 %; la confianza baja a 0.92 cuando hay diferencia. Diferencias mayores al 25 % con la misma referencia se marcan como `fuzzy` (revisión), no como error.
+**Alternativas**: pedir al usuario que registre retenciones antes de conciliar (más correcto, pero rompe la demo).
+**Consecuencias**: match rate real (Andina 14/19) usable para demo; Fase 4 podrá derivar retenciones del delta cuando exista.
+
 ## 2026-09-28 — Advertencias vs. errores en extracción
 **Decisión**: solo la falta de datos estructurales (número, fecha, NIT, totales, líneas) es error (`status='error'`). Descuadres de totales, DV de NIT inválido, CUFE sintético y todo lo extraído por Vision quedan como advertencias en `invoices.notes` para revisión del contador.

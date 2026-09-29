@@ -58,16 +58,16 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 3 — Clasificación + Conciliación
+## Fase 3 — Clasificación + Conciliación ✅
 
-- [ ] `classification/puc.py`: Haiku 4.5 con catálogo PUC como contexto → cuenta sugerida
-- [ ] `classification/deductibility.py`
-- [ ] `reconciliation/engine.py` con pandas: exact match, fuzzy, transferencias internas
-- [ ] Endpoint `/bank/upload` (CSV → normalización → matching)
-- [ ] Score de confianza por match
-- [ ] Tests: motor de conciliación
+- [x] `classification/puc.py`: Haiku 4.5 con catálogo PUC como contexto → cuenta sugerida (+ reglas offline como fallback)
+- [x] `classification/deductibility.py`
+- [x] `reconciliation/csv_parser.py` + `reconciliation/engine.py`: exact (con tolerancia a retenciones), fuzzy, transferencias internas
+- [x] Endpoint `POST /bank/upload` (CSV → normalización → matching) + `/bank/reconcile/{cid}` + `/invoices/{id}/classify` + `/clients/{cid}/classify`
+- [x] Score de confianza por match
+- [x] Tests: motor de conciliación (14) + clasificación (10). Total repo: 43.
 
-**Entrega**: subir CSV bancario devuelve JSON con matches automáticos + revisiones pendientes.
+**Entrega**: subir CSV bancario devuelve JSON con matches automáticos + revisiones pendientes. Bitácora: `docs/phases/phase-3.md`.
 
 ---
 

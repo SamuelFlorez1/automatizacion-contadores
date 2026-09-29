@@ -1,26 +1,27 @@
 # Estado actual del proyecto
 
 **Última actualización**: 2026-09-28
-**Fase actual**: Fase 2 cerrada ✅ — próxima sesión arranca **Fase 3 (Clasificación + Conciliación)**
-**Última sesión**: Fase 2 completa — extracción XML/Vision, ingesta por upload/WhatsApp/email con idempotencia, HMAC, rate limit y tests.
+**Fase actual**: Fase 3 cerrada ✅ — próxima sesión arranca **Fase 4 (Cálculo fiscal)**
+**Última sesión**: Fase 3 completa — clasificación PUC (Haiku + reglas offline), deducibilidad, parser CSV y motor de conciliación con retenciones toleradas. 43 tests pasan.
 
 ---
 
 ## ¿En qué vamos?
 
-**Fase 2 cerrada.** Ver `docs/phases/phase-2.md`. Endpoints: `POST /ingest/upload` (JWT), `POST /webhooks/evolution` (HMAC), `POST /ingest/email` (secreto). 19 tests pasan.
+**Fase 3 cerrada.** Ver `docs/phases/phase-3.md`. Endpoints nuevos: `POST /bank/upload`, `POST /bank/reconcile/{cid}`, `POST /invoices/{id}/classify`, `POST /clients/{cid}/classify`.
 
-**Base de datos remoto** (`flwxzcqggtefhxnxxfhy`): seed re-ejecutado (53 facturas, 61 docs, 4 usuarios demo); bucket privado `documents` en Storage creado por la ingesta.
+Smoke contra Supabase remoto: Andina 14/19 exactos (los 5 restantes son ATMs), Pacifico limitado por ambigüedades del seed (documentadas como deuda). Todo se limpió tras la prueba.
 
-**Credenciales en `.env`**: ✅ Anthropic, Supabase. ⏸️ Evolution / n8n (Fase 5). Nuevas opcionales: `INGEST_EMAIL_SECRET`, `EVOLUTION_WEBHOOK_SECRET` (vacías = esos canales rechazan todo).
+**Credenciales en `.env`**: ✅ Anthropic, Supabase. ⏸️ Evolution / n8n (Fase 5).
 
-## Próximo paso concreto — arrancar Fase 3
+## Próximo paso concreto — arrancar Fase 4
 
-1. `backend/app/classification/puc.py`: Haiku 4.5 con `tax/puc.json` como contexto → `invoices.puc_account`, `classification_confidence`.
-2. `classification/deductibility.py` → `is_deductible`.
-3. `reconciliation/engine.py` (pandas): exact, fuzzy, transferencias internas; `reconciliation_matches`.
-4. `POST /bank/upload`: CSV → normalización → matching. Los CSV subidos por `/ingest/upload` quedan `documents.kind='bank_statement'`, `status='received'`. CSVs del seed en `backend/seeds/bank_statements/`.
-5. Tests del motor de conciliación. Cerrar fase con STATE/PLAN/phase-3.md.
+1. `backend/app/tax/iva.py`: cálculo bimestral/cuatrimestral desde `invoices` según `clients.iva_frequency`.
+2. `tax/rete_fuente.py`, `tax/rete_ica.py`, `tax/simple.py` — cada uno por concepto/ciudad/régimen.
+3. Generador de `tax_obligations` combinando facturas + `tax/calendar_2026.json` (ya cargado). Idempotente por `(client_id, kind, period_label)`.
+4. Endpoint `GET /tax/calculate/{client_id}/{period}` devuelve obligaciones + snapshot.
+5. Tests: cálculos fiscales (IVA con retenciones, Simple por actividad, ICA por ciudad).
+6. Cerrar fase con STATE/PLAN/phase-4.md + commit `feat(phase-4)`.
 
 ## Bootstrap de sesión nueva
 
@@ -47,6 +48,7 @@ git log --oneline -20
 
 ## Cambios recientes
 
+- 2026-09-28: **Fase 3 completa.** Clasificación PUC (Haiku + reglas), deducibilidad E.T., parser CSV robusto, motor de conciliación con tolerancia a retenciones y tie-break por similitud+fecha. 43 tests.
 - 2026-09-28: **Fase 2 completa.** Parser UBL, Vision, ingesta 3 canales, auth JWKS. Corregido bug de `nit_dv` (residuo 1).
 - 2026-09-28: **Fase 1 completa.** Schema SQL aplicado a Supabase remoto; 53 facturas seed; calendario DIAN 2026 + PUC cableados; usuarios demo con roles vía Supabase Auth.
 - 2026-09-28: `SUPABASE_DB_URL` cargada; migraciones se ejecutan directo con psycopg.
