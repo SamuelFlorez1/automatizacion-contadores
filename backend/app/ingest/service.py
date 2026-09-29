@@ -102,7 +102,12 @@ def find_client(db: Client, *, phone: str | None = None, email: str | None = Non
     return None
 
 
+_bucket_checked: set[str] = set()
+
+
 def _ensure_bucket(db: Client, bucket: str) -> None:
+    if bucket in _bucket_checked:
+        return
     try:
         db.storage.get_bucket(bucket)
     except Exception:
@@ -110,6 +115,7 @@ def _ensure_bucket(db: Client, bucket: str) -> None:
             db.storage.create_bucket(bucket, options={"public": False})
         except Exception as e:  # carrera con otro worker: ya existe
             log.warning("bucket_create_failed", error=str(e))
+    _bucket_checked.add(bucket)
 
 
 def _check_rate_limit(db: Client, client_id: str) -> None:

@@ -10,6 +10,7 @@ from __future__ import annotations
 import base64
 import hashlib
 import hmac
+import json
 
 import httpx
 import structlog
@@ -52,12 +53,21 @@ def _fetch_media_b64(message: dict) -> str | None:
 
 @router.post("/evolution")
 async def evolution_webhook(request: Request) -> dict:
+    """Async solo para leer body/firma antes de decodificar; el trabajo bloqueante
+    (Supabase, httpx a Evolution) se delega a un helper sync que FastAPI empuja
+    al threadpool con `run_in_threadpool` para no ahogar el event loop."""
+    from starlette.concurrency import run_in_threadpool
+
     s = get_settings()
     body = await request.body()
     if not verify_signature(body, request.headers.get("x-signature"), s.evolution_webhook_secret):
         raise HTTPException(401, "Firma inválida")
 
-    payload = await request.json()
+    try:
+        payload = json.loads(body)
+    except json.JSONDecodeError as e:
+        raise HTTPException(400, f"Body no es JSON válido: {e}") from e
+
     if str(payload.get("event", "")).lower().replace("_", ".") != "messages.upsert":
         return {"status": "ignored", "reason": "evento no relevante"}
     data = payload.get("data") or {}
@@ -70,7 +80,7 @@ async def evolution_webhook(request: Request) -> dict:
     if not kind:
         return {"status": "ignored", "reason": "sin adjunto"}  # texto: lo atiende el agente (Fase 5)
 
-    return _handle_media(data, key, msg, kind)
+    return await run_in_threadpool(_handle_media, data, key, msg, kind)
 
 
 def _handle_media(data: dict, key: dict, msg: dict, kind: str) -> dict:

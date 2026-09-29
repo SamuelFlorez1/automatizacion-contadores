@@ -169,7 +169,7 @@ def to_extracted_invoice(raw: dict[str, Any]) -> ExtractedInvoice:
         total=total,
         lines=lines,
         source="vision",
-        confidence=float(raw.get("confidence") or 0.5),
+        confidence=float(raw["confidence"]) if raw.get("confidence") is not None else 0.5,
         warnings=warnings,
     )
 
