@@ -24,23 +24,23 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 1 — Modelo de datos + seed
+## Fase 1 — Modelo de datos + seed ✅
 
-- [ ] Migraciones SQL en `backend/migrations/` (schema del §5 del spec)
-- [ ] Cliente Supabase (`backend/app/db/client.py`)
-- [ ] Buscar y cablear **calendario DIAN 2026** → `backend/app/tax/calendar_2026.json`
-- [ ] Buscar y cablear **catálogo PUC** resumido → `backend/app/tax/puc.json`
-- [ ] Script `backend/seeds/seed.py`:
+- [x] Migraciones SQL en `backend/migrations/` (schema completo con RLS por firm_id)
+- [x] Cliente Supabase (`backend/app/db/client.py`)
+- [x] Buscar y cablear **calendario DIAN 2026** → `backend/app/tax/calendar_2026.json`
+- [x] Buscar y cablear **catálogo PUC** resumido → `backend/app/tax/puc.json`
+- [x] Script `backend/seeds/seed.py`:
   - 1 despacho
   - Cliente A: Régimen Simple, servicios
   - Cliente B: Régimen Ordinario con importaciones USD
-  - 20–30 facturas por cliente, 3 meses
-- [ ] Generador XMLs UBL 2.1 sintéticos válidos
-- [ ] Generador CSVs bancarios coherentes con facturas
-- [ ] Generador imágenes/PDFs de facturas sintéticas (para Vision)
-- [ ] Auth Supabase configurada con roles: `firm_admin`, `accountant`, `client`
+  - 25 + 28 facturas, 3 meses (jul-sep 2026)
+- [x] Generador XMLs UBL 2.1 sintéticos válidos
+- [x] Generador CSVs bancarios coherentes con facturas
+- [x] Generador imágenes PNG de facturas sintéticas (para Vision — ~15% del volumen)
+- [x] Auth Supabase configurada con roles: `firm_admin`, `accountant`, `client`
 
-**Entrega**: `python -m seeds.seed` puebla la base; hay archivos en `seeds/invoices_xml/`, `seeds/invoices_images/`, `seeds/bank_statements/`.
+**Entrega**: `python -m seeds.seed` + `python -m seeds.seed_users` pueblan la base. Archivos en `backend/seeds/invoices_xml/`, `backend/seeds/invoices_images/`, `backend/seeds/bank_statements/`. Bitácora: `docs/phases/phase-1.md`.
 
 ---
 

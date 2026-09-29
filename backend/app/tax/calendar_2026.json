@@ -1,0 +1,177 @@
+{
+  "year": 2026,
+  "country": "CO",
+  "notes": [
+    "Fuentes: DIAN calendario 2026, Actualícese, El Tiempo, Bogotá SDH Res. 000195 dic-2025.",
+    "Los vencimientos DIAN escalonan por último dígito NIT dentro de un rango publicado.",
+    "Convención aquí: rango [range_start, range_end] hábiles, y días hábiles por dígito.",
+    "Los días exactos por dígito se derivan con tax/calendar.py usando days_by_digit (índice = dígito 0..9).",
+    "Cuando la fuente no publica día exacto por dígito, se interpola dentro del rango publicado."
+  ],
+  "iva_bimestral": {
+    "description": "IVA bimestral — responsables con ingresos >= 92.000 UVT",
+    "form": "300",
+    "periods": [
+      {
+        "label": "ene-feb-2026",
+        "period_start": "2026-01-01",
+        "period_end": "2026-02-28",
+        "range_start": "2026-03-10",
+        "range_end": "2026-03-24",
+        "source": "DIAN calendario tributario 2026 (rango canónico marzo)"
+      },
+      {
+        "label": "mar-abr-2026",
+        "period_start": "2026-03-01",
+        "period_end": "2026-04-30",
+        "range_start": "2026-05-12",
+        "range_end": "2026-05-26",
+        "source": "actualicese.com/calendario-tributario-2026"
+      },
+      {
+        "label": "may-jun-2026",
+        "period_start": "2026-05-01",
+        "period_end": "2026-06-30",
+        "range_start": "2026-07-09",
+        "range_end": "2026-07-23",
+        "source": "DIAN calendario tributario 2026"
+      },
+      {
+        "label": "jul-ago-2026",
+        "period_start": "2026-07-01",
+        "period_end": "2026-08-31",
+        "range_start": "2026-09-09",
+        "range_end": "2026-09-22",
+        "source": "DIAN calendario tributario 2026"
+      },
+      {
+        "label": "sep-oct-2026",
+        "period_start": "2026-09-01",
+        "period_end": "2026-10-31",
+        "range_start": "2026-11-11",
+        "range_end": "2026-11-25",
+        "source": "DIAN calendario tributario 2026"
+      },
+      {
+        "label": "nov-dic-2026",
+        "period_start": "2026-11-01",
+        "period_end": "2026-12-31",
+        "range_start": "2027-01-13",
+        "range_end": "2027-01-26",
+        "source": "DIAN calendario tributario 2026"
+      }
+    ]
+  },
+  "iva_cuatrimestral": {
+    "description": "IVA cuatrimestral — responsables con ingresos < 92.000 UVT",
+    "form": "300",
+    "periods": [
+      {
+        "label": "ene-abr-2026",
+        "period_start": "2026-01-01",
+        "period_end": "2026-04-30",
+        "range_start": "2026-05-12",
+        "range_end": "2026-05-26",
+        "source": "actualicese.com — cuatrimestre 1 mayo 2026"
+      },
+      {
+        "label": "may-ago-2026",
+        "period_start": "2026-05-01",
+        "period_end": "2026-08-31",
+        "range_start": "2026-09-09",
+        "range_end": "2026-09-22",
+        "source": "DIAN calendario tributario 2026"
+      },
+      {
+        "label": "sep-dic-2026",
+        "period_start": "2026-09-01",
+        "period_end": "2026-12-31",
+        "range_start": "2027-01-13",
+        "range_end": "2027-01-26",
+        "source": "DIAN calendario tributario 2026"
+      }
+    ]
+  },
+  "rete_fuente": {
+    "description": "Retención en la fuente mensual — agentes de retención",
+    "form": "350",
+    "note": "Vence entre el 8 y el 22 del mes siguiente según últimos dígitos NIT.",
+    "periods": [
+      {"label": "2026-01", "period_start": "2026-01-01", "period_end": "2026-01-31", "range_start": "2026-02-10", "range_end": "2026-02-24"},
+      {"label": "2026-02", "period_start": "2026-02-01", "period_end": "2026-02-28", "range_start": "2026-03-10", "range_end": "2026-03-24"},
+      {"label": "2026-03", "period_start": "2026-03-01", "period_end": "2026-03-31", "range_start": "2026-04-13", "range_end": "2026-04-24"},
+      {"label": "2026-04", "period_start": "2026-04-01", "period_end": "2026-04-30", "range_start": "2026-05-12", "range_end": "2026-05-26"},
+      {"label": "2026-05", "period_start": "2026-05-01", "period_end": "2026-05-31", "range_start": "2026-06-10", "range_end": "2026-06-24"},
+      {"label": "2026-06", "period_start": "2026-06-01", "period_end": "2026-06-30", "range_start": "2026-07-09", "range_end": "2026-07-23"},
+      {"label": "2026-07", "period_start": "2026-07-01", "period_end": "2026-07-31", "range_start": "2026-08-11", "range_end": "2026-08-25"},
+      {"label": "2026-08", "period_start": "2026-08-01", "period_end": "2026-08-31", "range_start": "2026-09-09", "range_end": "2026-09-22"},
+      {"label": "2026-09", "period_start": "2026-09-01", "period_end": "2026-09-30", "range_start": "2026-10-13", "range_end": "2026-10-26"},
+      {"label": "2026-10", "period_start": "2026-10-01", "period_end": "2026-10-31", "range_start": "2026-11-11", "range_end": "2026-11-25"},
+      {"label": "2026-11", "period_start": "2026-11-01", "period_end": "2026-11-30", "range_start": "2026-12-10", "range_end": "2026-12-23"},
+      {"label": "2026-12", "period_start": "2026-12-01", "period_end": "2026-12-31", "range_start": "2027-01-13", "range_end": "2027-01-26"}
+    ],
+    "source": "actualicese.com/plazos-para-declaracion-y-pago-de-retencion-en-la-fuente-2026"
+  },
+  "renta_pj_ordinaria": {
+    "description": "Renta personas jurídicas ordinarias (no grandes contribuyentes) — año gravable 2025",
+    "form": "110",
+    "installments": [
+      {
+        "label": "renta_pj_2025_cuota1",
+        "kind": "declaracion_y_primera_cuota",
+        "range_start": "2026-05-12",
+        "range_end": "2026-05-26"
+      },
+      {
+        "label": "renta_pj_2025_cuota2",
+        "kind": "segunda_cuota",
+        "range_start": "2026-07-09",
+        "range_end": "2026-07-23"
+      }
+    ],
+    "source": "actualicese.com/plazos-para-declaracion-y-pago-de-impuesto-de-renta-personas-juridicas-2026"
+  },
+  "renta_grandes_contribuyentes": {
+    "description": "Renta grandes contribuyentes — año gravable 2025, tres cuotas",
+    "form": "110",
+    "installments": [
+      {"label": "renta_gc_2025_cuota1", "range_start": "2026-02-10", "range_end": "2026-02-23"},
+      {"label": "renta_gc_2025_cuota2", "range_start": "2026-04-13", "range_end": "2026-04-24"},
+      {"label": "renta_gc_2025_cuota3", "range_start": "2026-06-10", "range_end": "2026-06-24"}
+    ],
+    "source": "El Tiempo / infobae — calendario DIAN 2026"
+  },
+  "regimen_simple": {
+    "description": "Régimen Simple de Tributación — 6 anticipos bimestrales + declaración anual",
+    "form_bimestral": "2593",
+    "form_anual": "260",
+    "anticipos_bimestrales": [
+      {"label": "simple_2026_bim1", "period_start": "2026-01-01", "period_end": "2026-02-28", "range_start": "2026-05-12", "range_end": "2026-05-26"},
+      {"label": "simple_2026_bim2", "period_start": "2026-03-01", "period_end": "2026-04-30", "range_start": "2026-07-09", "range_end": "2026-07-23"},
+      {"label": "simple_2026_bim3", "period_start": "2026-05-01", "period_end": "2026-06-30", "range_start": "2026-09-09", "range_end": "2026-09-22"},
+      {"label": "simple_2026_bim4", "period_start": "2026-07-01", "period_end": "2026-08-31", "range_start": "2026-11-11", "range_end": "2026-11-25"},
+      {"label": "simple_2026_bim5", "period_start": "2026-09-01", "period_end": "2026-10-31", "range_start": "2027-01-13", "range_end": "2027-01-26"},
+      {"label": "simple_2026_bim6", "period_start": "2026-11-01", "period_end": "2026-12-31", "range_start": "2027-03-10", "range_end": "2027-03-24"}
+    ],
+    "declaracion_anual": {
+      "label": "simple_2025_anual",
+      "range_start": "2026-04-13",
+      "range_end": "2026-04-24",
+      "note": "Aplicable a inscritos en SIMPLE año gravable 2025 (Decreto 1625/2016 mod. Decreto 2229/2023)."
+    },
+    "source": "actualicese.com/plazos-para-presentar-la-declaracion-anual-consolidada-del-regimen-simple-2026"
+  },
+  "ica_bogota": {
+    "description": "ICA bimestral Bogotá — Resolución SDH-000195 de 2025",
+    "note": "Fecha única de vencimiento por bimestre (no escalonada por NIT).",
+    "periods": [
+      {"label": "ica_bog_bim1_2026", "period_start": "2026-01-01", "period_end": "2026-02-28", "due_date": "2026-04-10"},
+      {"label": "ica_bog_bim2_2026", "period_start": "2026-03-01", "period_end": "2026-04-30", "due_date": "2026-06-12"},
+      {"label": "ica_bog_bim3_2026", "period_start": "2026-05-01", "period_end": "2026-06-30", "due_date": "2026-08-21"},
+      {"label": "ica_bog_bim4_2026", "period_start": "2026-07-01", "period_end": "2026-08-31", "due_date": "2026-10-16", "source": "estimated"},
+      {"label": "ica_bog_bim5_2026", "period_start": "2026-09-01", "period_end": "2026-10-31", "due_date": "2026-12-11", "source": "estimated"},
+      {"label": "ica_bog_bim6_2026", "period_start": "2026-11-01", "period_end": "2026-12-31", "due_date": "2027-02-19", "source": "estimated"}
+    ],
+    "source_official": "bogota.gov.co — pago ICA / Resolución SDH-000195"
+  }
+}
