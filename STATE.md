@@ -1,8 +1,8 @@
 # Estado actual del proyecto
 
-**Última actualización**: 2026-09-26
+**Última actualización**: 2026-09-28
 **Fase actual**: Fase 0 cerrada ✅ — próxima sesión arranca **Fase 1**
-**Última sesión**: Fase 0 completa (scaffold backend + frontend + docker + docs)
+**Última sesión**: Fase 0 completa + credenciales Supabase/Anthropic cargadas en `.env`
 
 ---
 
@@ -10,17 +10,18 @@
 
 **Fase 0 cerrada.** Ver `docs/phases/phase-0.md` para bitácora completa.
 
-**Bloqueador antes de Fase 1**: el usuario debe crear el proyecto Supabase (`sa-east-1`) y llenar en `.env`:
-- `SUPABASE_URL`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `SUPABASE_ANON_KEY`
-- `SUPABASE_JWT_SECRET`
+**Estado credenciales en `.env`**:
+- ✅ `ANTHROPIC_API_KEY`
+- ✅ `SUPABASE_URL` (proyecto `flwxzcqggtefhxnxxfhy`)
+- ✅ `SUPABASE_SERVICE_ROLE_KEY`, `SUPABASE_ANON_KEY`, `SUPABASE_SECRET_KEY`
+- ⚠️ `SUPABASE_JWT_SECRET` **pendiente** — sacar de Dashboard → Project Settings → API → JWT Secret (necesario para validar tokens de Auth en el backend en Fase 1)
+- ⏸️ Evolution API / n8n — se piden cuando lleguemos a Fase 5
 
 ## Próximo paso concreto — arrancar Fase 1
 
 Al abrir sesión nueva:
 
-1. Confirmar con el usuario que Supabase está creado y `.env` está lleno.
+1. Pedirle al usuario el `SUPABASE_JWT_SECRET` si aún no está en `.env` (o seguir sin él si Auth no se toca en la primera parte de Fase 1).
 2. Correr smoke test de Fase 0 primero (opcional pero recomendado):
    - `cd backend && python -m venv .venv && source .venv/bin/activate && pip install -e ".[dev]" && pytest`
    - `uvicorn app.main:app --reload` → `curl localhost:8000/health`
@@ -49,9 +50,10 @@ git log --oneline -20  # últimos commits
 
 ## Bloqueos / esperando algo
 
-- **Fase 1**: usuario debe crear proyecto Supabase antes de que se puedan correr migraciones remotas. Se puede desarrollar el schema y probar contra Postgres local (`docker compose up -d db`) mientras tanto.
+- **Fase 1**: falta `SUPABASE_JWT_SECRET` en `.env` para validar tokens de Auth en el backend. Se puede avanzar en migraciones, seed y schema mientras tanto.
 - **Fase 5**: usuario tiene Evolution API en Hostinger; pedirá URL/key/instance cuando llegue el momento.
 
 ## Cambios recientes
 
+- 2026-09-28: credenciales Supabase (URL + service_role + anon + sb_secret) y `ANTHROPIC_API_KEY` cargadas en `.env` (gitignored). Falta `SUPABASE_JWT_SECRET`.
 - 2026-09-26: Fase 0 completa — scaffold monorepo (backend FastAPI, frontend Next 15, Postgres local, Dockerfile, README, sistema de contexto). Ver `docs/phases/phase-0.md`.
