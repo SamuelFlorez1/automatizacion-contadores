@@ -71,16 +71,17 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 4 — Cálculo fiscal
+## Fase 4 — Cálculo fiscal ✅
 
-- [ ] `tax/iva.py`: bimestral/cuatrimestral según régimen
-- [ ] `tax/rete_fuente.py`: por concepto
-- [ ] `tax/rete_ica.py`: por ciudad configurable
-- [ ] `tax/simple.py`: régimen unificado
-- [ ] Generador de `tax_obligations` desde facturas + calendario DIAN
-- [ ] Tests: cálculos fiscales
+- [x] `tax/iva.py`: bimestral/cuatrimestral según régimen
+- [x] `tax/rete_fuente.py`: por concepto (mapa PUC→concepto DIAN)
+- [x] `tax/rete_ica.py`: por ciudad (Bogotá con tarifas por CIIU)
+- [x] `tax/simple.py`: régimen unificado (grupo por CIIU, tramos UVT)
+- [x] Generador `tax/obligations.py` UPSERT idempotente por (client_id, kind, period_label)
+- [x] Endpoints `POST /tax/generate`, `GET /tax/calculate`, `GET /tax/obligations`
+- [x] Tests: 17 (cálculos + generador). Total repo: 60.
 
-**Entrega**: `/tax/calculate/{client_id}/{period}` devuelve obligaciones calculadas.
+**Entrega**: `/tax/calculate/{client_id}/{period}` devuelve obligaciones calculadas. Bitácora: `docs/phases/phase-4.md`.
 
 ---
 
