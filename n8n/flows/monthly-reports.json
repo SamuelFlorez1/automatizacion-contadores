@@ -1,5 +1,5 @@
 {
-  "name": "Monthly reports (placeholder — Fase 6)",
+  "name": "Monthly reports — dispara /reports/monthly por cliente",
   "nodes": [
     {
       "parameters": {
@@ -13,17 +13,66 @@
     },
     {
       "parameters": {
-        "jsCode": "// Placeholder: en Fase 6 se listará clients activos y se disparará\n// POST {API_BASE}/reports/monthly/{client_id}/{period} por cada uno.\nreturn [{json: {status: 'placeholder', message: 'Reports Fase 6 pendiente'}}];"
+        "jsCode": "// Calcula el período anterior en formato YYYY-MM\nconst d = new Date();\nd.setDate(1);\nd.setMonth(d.getMonth() - 1);\nconst y = d.getFullYear();\nconst m = String(d.getMonth() + 1).padStart(2, '0');\nreturn [{ json: { period: `${y}-${m}` } }];"
       },
-      "id": "todo",
-      "name": "TODO Fase 6",
+      "id": "prev-period",
+      "name": "Período anterior",
       "type": "n8n-nodes-base.code",
       "typeVersion": 2,
-      "position": [500, 300]
+      "position": [420, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.SUPABASE_URL}}/rest/v1/clients?select=id",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "apikey", "value": "={{$env.SUPABASE_SERVICE_ROLE_KEY}}"},
+            {"name": "Authorization", "value": "Bearer {{$env.SUPABASE_SERVICE_ROLE_KEY}}"}
+          ]
+        }
+      },
+      "id": "list-clients",
+      "name": "Listar clientes",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [640, 300]
+    },
+    {
+      "parameters": {
+        "batchSize": 1,
+        "options": {}
+      },
+      "id": "split-clients",
+      "name": "Un cliente a la vez",
+      "type": "n8n-nodes-base.splitInBatches",
+      "typeVersion": 3,
+      "position": [860, 300]
+    },
+    {
+      "parameters": {
+        "url": "={{$env.API_BASE}}/reports/monthly/{{$json.id}}/{{$node['Período anterior'].json.period}}?format=pdf",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {"name": "Authorization", "value": "Bearer {{$env.CRON_JWT}}"}
+          ]
+        },
+        "options": {"response": {"response": {"responseFormat": "file"}}}
+      },
+      "id": "get-pdf",
+      "name": "GET /reports/monthly",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [1080, 300]
     }
   ],
   "connections": {
-    "1er día del mes 7am": {"main": [[{"node": "TODO Fase 6", "type": "main", "index": 0}]]}
+    "1er día del mes 7am": {"main": [[{"node": "Período anterior", "type": "main", "index": 0}]]},
+    "Período anterior":    {"main": [[{"node": "Listar clientes", "type": "main", "index": 0}]]},
+    "Listar clientes":     {"main": [[{"node": "Un cliente a la vez", "type": "main", "index": 0}]]},
+    "Un cliente a la vez": {"main": [[{"node": "GET /reports/monthly", "type": "main", "index": 0}]]},
+    "GET /reports/monthly":{"main": [[{"node": "Un cliente a la vez", "type": "main", "index": 0}]]}
   },
   "active": false,
   "settings": {"executionOrder": "v1", "timezone": "America/Bogota"},

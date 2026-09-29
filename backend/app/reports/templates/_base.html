@@ -1,0 +1,57 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>{% block title %}Reporte{% endblock %}</title>
+<style>
+  @page { size: A4; margin: 22mm 18mm 20mm 18mm;
+    @bottom-right { content: "Página " counter(page) " de " counter(pages);
+                    font-size: 9pt; color: #666; } }
+  * { box-sizing: border-box; }
+  body { font-family: "Helvetica", "Arial", sans-serif; font-size: 10pt;
+         color: #1a1a1a; line-height: 1.4; }
+  h1 { font-size: 20pt; margin: 0 0 4pt 0; color: #0b3d91; }
+  h2 { font-size: 13pt; margin: 18pt 0 6pt 0; color: #0b3d91;
+       border-bottom: 1pt solid #0b3d91; padding-bottom: 2pt; }
+  h3 { font-size: 11pt; margin: 12pt 0 4pt 0; color: #333; }
+  .muted { color: #666; font-size: 9pt; }
+  .header { display: flex; justify-content: space-between; align-items: flex-end;
+            border-bottom: 2pt solid #0b3d91; padding-bottom: 8pt; margin-bottom: 12pt; }
+  .header .brand { font-weight: bold; color: #0b3d91; font-size: 11pt; }
+  .kv { display: grid; grid-template-columns: max-content 1fr; gap: 2pt 12pt; }
+  .kv .k { color: #666; }
+  table { width: 100%; border-collapse: collapse; margin: 6pt 0; }
+  th, td { padding: 4pt 6pt; text-align: left; border-bottom: 0.5pt solid #ddd; }
+  th { background: #f2f5fb; font-weight: 600; }
+  td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+  tr.total td { font-weight: bold; border-top: 1pt solid #333; background: #f8f9fc; }
+  .pill { display: inline-block; padding: 1pt 6pt; border-radius: 8pt;
+          font-size: 8pt; background: #e6ecf7; color: #0b3d91; }
+  .box { border: 0.5pt solid #ccc; padding: 8pt; border-radius: 3pt;
+         background: #fafbfd; margin: 6pt 0; }
+  .narrative { font-style: italic; color: #333; }
+  .footer { margin-top: 18pt; font-size: 8pt; color: #888;
+            border-top: 0.5pt solid #ddd; padding-top: 6pt; }
+</style>
+</head>
+<body>
+<div class="header">
+  <div>
+    <div class="brand">Despacho Contable — Reporte generado automáticamente</div>
+    <h1>{% block heading %}{% endblock %}</h1>
+    <div class="muted">{% block subheading %}{% endblock %}</div>
+  </div>
+  <div class="muted" style="text-align: right;">
+    <div>Generado: {{ generated_at }}</div>
+    <div>Zona horaria: America/Bogota</div>
+  </div>
+</div>
+
+{% block body %}{% endblock %}
+
+<div class="footer">
+  Documento de trabajo interno. Cifras en COP salvo indicación contraria.
+  Este reporte no reemplaza la declaración oficial ante la DIAN.
+</div>
+</body>
+</html>

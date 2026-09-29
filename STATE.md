@@ -1,34 +1,37 @@
 # Estado actual del proyecto
 
 **Última actualización**: 2026-09-28
-**Fase actual**: Fase 5 cerrada ✅ — próxima sesión arranca **Fase 6 (Reportes PDF)**
-**Última sesión**: Fase 5 completa — agente WhatsApp (5 tools + Sonnet loop), endpoint `/agent/message`, envío Evolution, cron recordatorios, 3 flujos n8n exportados. 72 tests pasan.
+**Fase actual**: Fase 6 cerrada ✅ — próxima sesión arranca **Fase 7 (Frontend Next.js)**
+**Última sesión**: Fase 6 completa — reportes mensual y Formulario 300 en PDF, narrativa Sonnet con fallback, n8n mensual cablead. 85 tests pasan.
 
 ---
 
 ## ¿En qué vamos?
 
-**Fase 5 cerrada.** Ver `docs/phases/phase-5.md`. Endpoints nuevos:
-- `POST /agent/message` — punto de entrada del agente.
-- `POST /notifications/reminders/run` — cron (header `x-cron-secret`).
-- `POST /notifications/reminders/preview` — vista previa staff (JWT).
+**Fase 6 cerrada.** Ver `docs/phases/phase-6.md`. Endpoints nuevos:
+- `GET /reports/monthly/{client_id}/{YYYY-MM}` — PDF (o `?format=html`).
+- `GET /reports/iva/{client_id}/{period_label}` — PDF del Formulario 300 prellenado.
 
-Webhook `/webhooks/evolution` ahora también responde a mensajes de texto (los deriva al agente y contesta).
+**WeasyPrint**: `pip install weasyprint jinja2` + `brew install pango cairo gdk-pixbuf libffi` en macOS.
+En local: correr con `DYLD_LIBRARY_PATH=/opt/homebrew/lib` (el pytest lo requiere para los 2 tests de render E2E).
+En Railway (Fase 8): agregar `libpango-1.0-0 libpangoft2-1.0-0 libcairo2 libgdk-pixbuf2.0-0 libffi8` al build.
 
-**Credenciales en `.env`**: ✅ Anthropic, Supabase. ⏸️ Evolution (`EVOLUTION_API_URL`, `EVOLUTION_API_KEY`, `EVOLUTION_INSTANCE_NAME`) siguen pendientes. Sin ellas, el envío queda log-only pero el resto del pipeline funciona.
+**Credenciales en `.env`**: ✅ Anthropic, Supabase. ⏸️ Evolution sigue pendiente (no bloquea Fase 7).
 
-## Próximo paso concreto — arrancar Fase 6
+## Próximo paso concreto — arrancar Fase 7 (Frontend)
 
-1. `reports/monthly.py` — armar dataset por cliente/período (estado resultados, flujo caja, top gastos, comparativo mes anterior). Reusa lo que Fase 3 clasificó y Fase 4 calculó.
-2. Templates HTML en `reports/templates/` + WeasyPrint (`pip install weasyprint` en el venv; falta instalar).
-3. `reports/iva_form300.py` — prellena Formato 300 DIAN con datos de `tax_obligations` + facturas.
-4. Análisis IA opcional con Sonnet 5: párrafo narrativo al inicio del PDF.
-5. Endpoints `GET /reports/monthly/{cid}/{period}` y `/reports/iva/{cid}/{period}` que devuelven `application/pdf`.
-6. Rellenar el nodo TODO de `n8n/flows/monthly-reports.json` para generar reportes el 1º del mes.
-7. Tests: renderiza sin error, PDF > 0 bytes, campos numéricos coinciden con `tax_obligations`.
-8. Cerrar STATE/PLAN/phase-6.md + commit `feat(phase-6)`.
+1. `frontend/` ya tiene Next 15 + TS + Tailwind + shadcn/ui inicializado (Fase 0). Verificar que `pnpm dev` levanta.
+2. Cliente Supabase en el front (`@supabase/ssr`) con `NEXT_PUBLIC_SUPABASE_URL` + `NEXT_PUBLIC_SUPABASE_ANON_KEY`.
+3. Login/logout con email+password (usuarios seed de Fase 1). Middleware que redirige según rol.
+4. Layout despacho: sidebar (clientes, conciliación, obligaciones, reportes), topbar con usuario.
+5. Vista lista de clientes (`/clients`) — pega directo a Supabase con RLS.
+6. Vista cliente (`/clients/[id]`) — facturas emitidas/recibidas, movimientos bancarios, obligaciones.
+7. Vista conciliación (`/clients/[id]/reconciliation`) — matches + revisiones pendientes.
+8. Vista reportes (`/clients/[id]/reports`) — botones que descargan PDFs Fase 6 (mensual + IVA).
+9. Upload manual documentos + CSV — llama a `/documents/upload` y `/bank/upload` con JWT.
+10. Cerrar STATE/PLAN/phase-7.md + commit `feat(phase-7)`.
 
-**Preparativo**: instalar WeasyPrint y sus deps de sistema (`brew install pango cairo gdk-pixbuf libffi` en macOS) antes de arrancar.
+**Nota**: los endpoints de reportes requieren JWT válido; el front debe pasarlo como `Authorization: Bearer`.
 
 ## Bootstrap de sesión nueva
 
@@ -41,9 +44,9 @@ git log --oneline -20
 
 ## Bloqueos / esperando algo
 
-- **Fase 6**: WeasyPrint no instalado en el venv local + faltan deps de sistema.
-- **Evolution**: sin credenciales; envío WhatsApp queda log-only. No bloquea Fase 6.
-- **Deuda tax**: Renta PJ/GC y declaración anual Simple aún sin calcular — el calendario ya los tiene, se atacan en Fase 6 junto con los reportes anuales.
+- **Evolution**: sin credenciales; envío WhatsApp queda log-only. No bloquea Fase 7.
+- **Deuda tax**: Renta PJ/GC y declaración anual Simple siguen sin calcular. Se pueden atacar en paralelo a Fase 7 o dejarse para Fase 8.
+- **Docker/Railway build para WeasyPrint**: hay que agregar apt packages cuando arranquemos Fase 8.
 
 ## Usuarios demo (Fase 1)
 
@@ -56,6 +59,7 @@ git log --oneline -20
 
 ## Cambios recientes
 
+- 2026-09-28: **Fase 6 completa.** Reportes mensual y Formulario 300 PDF, narrativa Sonnet 5 con fallback, endpoints `/reports/*`, n8n mensual cableado, 13 tests nuevos (85 total).
 - 2026-09-28: **Fase 5 completa.** Agente WhatsApp (5 tools + Sonnet loop, `MAX_ITERS=10`), `/agent/message`, envío Evolution, cron `/notifications/reminders/run`, 3 flujos n8n exportados. 12 tests nuevos (72 total).
 - 2026-09-28: **Fase 4 completa.** IVA/rete_fuente/rete-ICA/ICA Bogotá/Simple, generador idempotente de `tax_obligations`, endpoints `/tax/*`. 17 tests nuevos (60 total).
 - 2026-09-28: **Fase 3 completa.** Clasificación PUC (Haiku + reglas), deducibilidad E.T., parser CSV, motor conciliación. 43 tests.

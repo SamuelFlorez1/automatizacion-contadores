@@ -100,14 +100,16 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 6 — Reportes PDF
+## Fase 6 — Reportes PDF ✅
 
-- [ ] `reports/monthly.py`: estado resultados, flujo caja, top 10 gastos, comparativo, análisis IA
-- [ ] Templates HTML + WeasyPrint
-- [ ] `reports/iva_form300.py`: prellenado formato 300
-- [ ] `GET /reports/monthly/{client_id}/{period}` y `/reports/iva/{client_id}/{period}`
+- [x] `reports/monthly.py`: estado resultados, flujo caja, top 10 gastos, comparativo, análisis IA (Sonnet + fallback)
+- [x] Templates HTML + WeasyPrint (`_base.html`, `monthly.html`, `iva_form300.html`)
+- [x] `reports/iva_form300.py`: prellenado formato 300 (10 casillas)
+- [x] `GET /reports/monthly/{client_id}/{period}` y `/reports/iva/{client_id}/{period_label}`
+- [x] n8n `monthly-reports.json` cablead con cron mensual real
+- [x] Tests: 13 nuevos (builders + render E2E con skip si faltan libs). Total repo: 85.
 
-**Entrega**: descargar PDFs desde dashboard.
+**Entrega**: `GET /reports/monthly/{cid}/2026-07` devuelve PDF; `GET /reports/iva/{cid}/jul-ago-2026` prellenado del 300. Bitácora: `docs/phases/phase-6.md`.
 
 ---
 

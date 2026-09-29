@@ -8,6 +8,7 @@ from app.ingest import upload as ingest_upload
 from app.ingest import whatsapp as ingest_whatsapp
 from app.notifications import routes as notifications_routes
 from app.reconciliation import routes as reconciliation_routes
+from app.reports import routes as reports_routes
 from app.tax import routes as tax_routes
 
 settings = get_settings()
@@ -33,6 +34,7 @@ app.include_router(reconciliation_routes.router)
 app.include_router(tax_routes.router)
 app.include_router(agent_routes.router)
 app.include_router(notifications_routes.router)
+app.include_router(reports_routes.router)
 
 
 @app.get("/health")

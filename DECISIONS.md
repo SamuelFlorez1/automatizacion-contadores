@@ -87,3 +87,14 @@ Formato:
 
 ## 2026-09-28 — Advertencias vs. errores en extracción
 **Decisión**: solo la falta de datos estructurales (número, fecha, NIT, totales, líneas) es error (`status='error'`). Descuadres de totales, DV de NIT inválido, CUFE sintético y todo lo extraído por Vision quedan como advertencias en `invoices.notes` para revisión del contador.
+
+## 2026-09-28 — Reportes: builders puros + persistencia separada
+**Contexto**: Fase 6 debía entregar PDFs (estado resultados + Formulario 300) reutilizando lo que ya calculó Fase 4 sin duplicar lógica ni requerir Supabase para testear.
+**Decisión**: cada reporte tiene funciones puras (`build_income_statement`, `build_cash_flow`, `build_top_expenses`, `build_form300`) que reciben listas de invoices/movimientos y devuelven dataclasses. `fetch_and_build(db, ...)` es la única capa que consulta Supabase. WeasyPrint se importa on-demand (import diferido) para no cargar libpango en cada startup de FastAPI ni en tests unitarios.
+**Alternativas**: usar SQL views para consolidar (menos flexible, obliga a mantener la vista); generar el PDF vía servicio externo (Gotenberg, Docraptor — se mete infraestructura extra).
+**Consecuencias**: los 11 tests de builder corren sin Supabase ni WeasyPrint; los 2 tests E2E de render tienen `skipif` cuando faltan las libs de sistema; el dataset se puede reutilizar desde otros disparadores (email, cron) sin refactor.
+
+## 2026-09-28 — Narrativa IA opcional con fallback determinístico
+**Contexto**: el reporte mensual gana con un párrafo ejecutivo, pero no puede depender de Anthropic para renderizar (CI, ambientes sin key, caídas del proveedor).
+**Decisión**: `generate_narrative(ds)` intenta Sonnet 5 en español si hay `ANTHROPIC_API_KEY`; en cualquier fallo (sin key, timeout, error de API) devuelve un párrafo armado a partir de las cifras del dataset. El endpoint acepta `?with_narrative=false` para saltar la llamada.
+**Consecuencias**: el PDF siempre trae narrativa, y el equipo puede optar por no gastar tokens cuando genera reportes en batch. El párrafo determinístico es plano pero preciso.

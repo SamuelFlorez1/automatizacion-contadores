@@ -1,0 +1,106 @@
+{% extends "_base.html" %}
+{% block title %}Reporte mensual — {{ ds.client.legal_name }} — {{ ds.period_label }}{% endblock %}
+{% block heading %}Reporte mensual {{ ds.period_label }}{% endblock %}
+{% block subheading %}{{ ds.client.legal_name }} · NIT {{ ds.client.nit }}-{{ ds.client.nit_dv }} · Régimen {{ ds.client.tax_regime }}{% endblock %}
+
+{% block body %}
+<div class="kv" style="margin-bottom: 8pt;">
+  <span class="k">Período</span><span>{{ ds.period_start|fmt_date }} → {{ ds.period_end|fmt_date }}</span>
+  <span class="k">Actividad</span><span>{{ ds.client.trade_name or '—' }}</span>
+  <span class="k">Ciudad</span><span>{{ ds.client.ica_city or '—' }}</span>
+</div>
+
+{% if ds.narrative %}
+<div class="box narrative">{{ ds.narrative }}</div>
+{% endif %}
+
+<h2>Estado de resultados</h2>
+<table>
+  <thead>
+    <tr>
+      <th>Concepto</th>
+      <th class="num">{{ ds.period_label }}</th>
+      {% if ds.previous_income_statement %}<th class="num">Mes anterior</th>{% endif %}
+    </tr>
+  </thead>
+  <tbody>
+    <tr><td>Ingresos operacionales</td>
+        <td class="num">{{ ds.income_statement.ingresos|cop }}</td>
+        {% if ds.previous_income_statement %}<td class="num">{{ ds.previous_income_statement.ingresos|cop }}</td>{% endif %}</tr>
+    <tr><td>(−) Costos de venta</td>
+        <td class="num">{{ ds.income_statement.costos|cop }}</td>
+        {% if ds.previous_income_statement %}<td class="num">{{ ds.previous_income_statement.costos|cop }}</td>{% endif %}</tr>
+    <tr class="total"><td>Utilidad bruta</td>
+        <td class="num">{{ ds.income_statement.utilidad_bruta|cop }}</td>
+        {% if ds.previous_income_statement %}<td class="num">{{ ds.previous_income_statement.utilidad_bruta|cop }}</td>{% endif %}</tr>
+    <tr><td>(−) Gastos operacionales</td>
+        <td class="num">{{ ds.income_statement.gastos|cop }}</td>
+        {% if ds.previous_income_statement %}<td class="num">{{ ds.previous_income_statement.gastos|cop }}</td>{% endif %}</tr>
+    <tr class="total"><td>Utilidad operacional</td>
+        <td class="num">{{ ds.income_statement.utilidad_operacional|cop }}</td>
+        {% if ds.previous_income_statement %}<td class="num">{{ ds.previous_income_statement.utilidad_operacional|cop }}</td>{% endif %}</tr>
+  </tbody>
+</table>
+{% if ds.variation_utilidad is not none %}
+  <p class="muted">Variación utilidad operacional vs. mes anterior: <span class="pill">{{ ds.variation_utilidad|pct }}</span></p>
+{% endif %}
+
+<h3>Impuestos del período</h3>
+<table>
+  <tr><td>IVA generado</td><td class="num">{{ ds.income_statement.iva_generado|cop }}</td></tr>
+  <tr><td>IVA descontable</td><td class="num">{{ ds.income_statement.iva_descontable|cop }}</td></tr>
+  <tr><td>Retenciones a favor (nos las hicieron)</td><td class="num">{{ ds.income_statement.retenciones_que_nos_hicieron|cop }}</td></tr>
+  <tr><td>Retenciones practicadas (a terceros)</td><td class="num">{{ ds.income_statement.retenciones_practicadas|cop }}</td></tr>
+</table>
+
+<h2>Flujo de caja</h2>
+<table>
+  <tr><td>Ingresos (efectivo)</td><td class="num">{{ ds.cash_flow.ingresos_efectivo|cop }}</td></tr>
+  <tr><td>Egresos (efectivo)</td><td class="num">{{ ds.cash_flow.egresos_efectivo|cop }}</td></tr>
+  <tr class="total"><td>Flujo neto</td><td class="num">{{ ds.cash_flow.neto|cop }}</td></tr>
+  {% if ds.cash_flow.saldo_final is not none %}
+  <tr><td>Saldo bancario al cierre</td><td class="num">{{ ds.cash_flow.saldo_final|cop }}</td></tr>
+  {% endif %}
+</table>
+<p class="muted">
+{% if ds.cash_flow.n_movimientos > 0 %}
+  Basado en {{ ds.cash_flow.n_movimientos }} movimientos bancarios.
+{% else %}
+  Sin extracto bancario cargado. Cifras estimadas desde totales facturados.
+{% endif %}
+</p>
+
+<h2>Top 10 gastos por proveedor</h2>
+{% if ds.top_expenses %}
+<table>
+  <thead><tr><th>#</th><th>Proveedor</th><th>Cuenta PUC</th><th class="num">Facturas</th><th class="num">Total</th></tr></thead>
+  <tbody>
+  {% for e in ds.top_expenses %}
+    <tr><td>{{ loop.index }}</td><td>{{ e.proveedor }}</td>
+        <td>{{ e.puc_account or '—' }}</td>
+        <td class="num">{{ e.n_facturas }}</td>
+        <td class="num">{{ e.total|cop }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No hay facturas recibidas en el período.</p>
+{% endif %}
+
+<h2>Obligaciones fiscales que vencen este mes</h2>
+{% if ds.obligations %}
+<table>
+  <thead><tr><th>Impuesto</th><th>Período</th><th>Vence</th><th class="num">Monto</th><th>Estado</th></tr></thead>
+  <tbody>
+  {% for o in ds.obligations %}
+    <tr><td>{{ o.kind }}</td><td>{{ o.period_label }}</td>
+        <td>{{ o.due_date|fmt_date }}</td>
+        <td class="num">{{ o.amount|cop }}</td>
+        <td><span class="pill">{{ o.status }}</span></td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% else %}
+<p class="muted">No hay obligaciones registradas con vencimiento en este mes.</p>
+{% endif %}
+{% endblock %}

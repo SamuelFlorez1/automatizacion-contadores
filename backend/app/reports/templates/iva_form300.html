@@ -1,0 +1,51 @@
+{% extends "_base.html" %}
+{% block title %}Prellenado Formulario 300 — {{ ds.client.legal_name }} — {{ ds.period_label }}{% endblock %}
+{% block heading %}Formulario 300 · IVA {{ ds.frequency }}{% endblock %}
+{% block subheading %}{{ ds.client.legal_name }} · NIT {{ ds.client.nit }}-{{ ds.client.nit_dv }} · Período {{ ds.period_label }}{% endblock %}
+
+{% block body %}
+<div class="kv" style="margin-bottom: 8pt;">
+  <span class="k">Período fiscal</span><span>{{ ds.period_start|fmt_date }} → {{ ds.period_end|fmt_date }}</span>
+  <span class="k">Frecuencia</span><span>{{ ds.frequency }}</span>
+  <span class="k">Vencimiento</span><span>{{ ds.due_date|fmt_date }}</span>
+  <span class="k">Régimen</span><span>{{ ds.client.tax_regime }}</span>
+</div>
+
+<div class="box">
+Este documento es un <strong>prellenado</strong>. El contador debe validar y
+firmar la declaración en el portal DIAN antes de presentarla. Los valores se
+tomaron de las facturas registradas en el sistema durante el período.
+</div>
+
+<h2>Resumen de operaciones</h2>
+<table>
+  <tr><td>Ventas gravadas (subtotal)</td><td class="num">{{ ds.ventas_gravadas|cop }}</td></tr>
+  <tr><td>Ventas excluidas / exentas</td><td class="num">{{ ds.ventas_excluidas|cop }}</td></tr>
+  <tr><td>Exportaciones</td><td class="num">{{ ds.ventas_exportacion|cop }}</td></tr>
+  <tr><td>Compras gravadas (subtotal)</td><td class="num">{{ ds.compras_gravadas|cop }}</td></tr>
+  <tr><td>Facturas emitidas</td><td class="num">{{ ds.iva.invoices_emitidas }}</td></tr>
+  <tr><td>Facturas recibidas</td><td class="num">{{ ds.iva.invoices_recibidas }}</td></tr>
+</table>
+
+<h2>Casillas prellenadas</h2>
+<table>
+  <thead><tr><th>Casilla</th><th>Concepto</th><th class="num">Valor</th></tr></thead>
+  <tbody>
+  {% for row in ds.casillas %}
+    <tr><td>{{ row.casilla }}</td><td>{{ row.concepto }}</td>
+        <td class="num">{{ row.valor|cop }}</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+<h2>Resultado del período</h2>
+<table>
+  <tr><td>IVA generado</td><td class="num">{{ ds.iva.iva_generado|cop }}</td></tr>
+  <tr><td>(−) IVA descontable</td><td class="num">{{ ds.iva.iva_descontable|cop }}</td></tr>
+  <tr><td>(−) Rete-IVA a favor</td><td class="num">{{ ds.iva.rete_iva_favor|cop }}</td></tr>
+  <tr class="total">
+    <td>{% if ds.iva.saldo >= 0 %}Saldo a pagar{% else %}Saldo a favor{% endif %}</td>
+    <td class="num">{{ (ds.iva.amount if ds.iva.saldo >= 0 else -ds.iva.saldo)|cop }}</td>
+  </tr>
+</table>
+{% endblock %}
