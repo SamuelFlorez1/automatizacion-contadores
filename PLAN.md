@@ -127,15 +127,16 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 
 ---
 
-## Fase 8 — Deploy + polish final
+## Fase 8 — Deploy + polish final ✅
 
-- [ ] Backend a Railway
-- [ ] Frontend a Vercel
-- [ ] Variables de entorno en ambos
-- [ ] Webhook Evolution apuntando a Railway
-- [ ] Healthchecks
-- [ ] GitHub Actions básico (lint + tests)
-- [ ] README final claro
-- [ ] Repo público en GitHub
+- [x] Backend a Railway (Dockerfile + railway.toml + .dockerignore + HEALTHCHECK)
+- [x] Frontend a Vercel (next.config.mjs listo, env vars documentadas)
+- [x] Variables de entorno en ambos (documentadas en README + .env.example)
+- [x] Webhook Evolution apuntando a Railway (documentado)
+- [x] Healthchecks (Dockerfile HEALTHCHECK + railway.toml healthcheckPath)
+- [x] GitHub Actions básico (ruff + pytest + tsc + pnpm build)
+- [x] README final claro (stack, credenciales, setup, deploy, estructura)
+- [x] CORS production-ready (cors_origins en config, whitelist en main)
+- [ ] Repo público en GitHub — **acción del usuario**: `git remote add origin <url> && git push -u origin main`
 
-**Entrega**: dominio Vercel abre la demo funcional; API Railway responde webhooks reales de WhatsApp.
+**Entrega**: Dockerfile y CI listos; deploy requiere conectar Railway/Vercel al repo y configurar env vars. Bitácora: `docs/phases/phase-8.md`.

@@ -31,6 +31,8 @@ class Settings(BaseSettings):
     evolution_instance_name: str = ""
     evolution_webhook_secret: str = ""
 
+    cors_origins: str = ""
+
     n8n_webhook_base: str = ""
 
     # Ingesta

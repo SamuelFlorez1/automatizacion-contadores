@@ -1,8 +1,8 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.config import get_settings
 from app.agent import routes as agent_routes
+from app.config import get_settings
 from app.ingest import email as ingest_email
 from app.ingest import upload as ingest_upload
 from app.ingest import whatsapp as ingest_whatsapp
@@ -19,9 +19,12 @@ app = FastAPI(
     description="Backend del despacho contable automatizado",
 )
 
+_dev_origins = ["http://localhost:3000", "http://127.0.0.1:3000"]
+_prod_origins = [o.strip() for o in settings.cors_origins.split(",") if o.strip()] if settings.cors_origins else []
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"] if settings.app_env == "development" else [],
+    allow_origins=(_dev_origins + _prod_origins) if settings.app_env == "development" else _prod_origins,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
