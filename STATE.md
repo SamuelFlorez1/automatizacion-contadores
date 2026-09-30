@@ -1,8 +1,8 @@
 # Estado actual del proyecto
 
-**Última actualización**: 2026-09-28
-**Fase actual**: Fase 8 cerrada ✅ — proyecto completo, listo para deploy
-**Última sesión**: Fase 8 — Dockerfile mejorado, CORS production, railway.toml, GitHub Actions CI, README final
+**Última actualización**: 2026-09-29
+**Fase actual**: Fase 9 cerrada ✅ — rediseño visual completo
+**Última sesión**: Fase 9 — shadcn/ui + Radix, tokens indigo/Geist, dashboard nuevo con KPIs y charts, sidebar agrupado, login split, todas las páginas rediseñadas
 
 ---
 

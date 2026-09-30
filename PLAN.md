@@ -140,3 +140,22 @@ Formato: `[ ]` pendiente, `[~]` en curso, `[x]` hecho, `[!]` bloqueado.
 - [ ] Repo público en GitHub — **acción del usuario**: `git remote add origin <url> && git push -u origin main`
 
 **Entrega**: Dockerfile y CI listos; deploy requiere conectar Railway/Vercel al repo y configurar env vars. Bitácora: `docs/phases/phase-8.md`.
+
+---
+
+## Fase 9 — Rediseño visual del frontend ✅
+
+- [x] shadcn/ui + Radix primitives (button, card, badge, input, tabs, select, dropdown, sheet, etc.)
+- [x] Design tokens: paleta indigo brand + semánticos (success/warning/danger), Geist Sans + Mono, radios, sombras propias
+- [x] Sidebar rediseñado agrupado (General / Operación / Fiscal / Configuración) con iconos lucide, item activo con vertical rule indigo
+- [x] Dashboard nuevo con KPIs (facturado, gastos, IVA, próxima obligación), bar chart Ingresos vs Gastos (recharts), lista de obligaciones DIAN con semáforo, actividad reciente
+- [x] Clientes: grid de cards con hover elevation en vez de tabla plana
+- [x] Detalle cliente: hero + tabs pill + donut de estado de pago + sparkline de facturación + tablas con badges de color
+- [x] Conciliación: contador destacado, barras de confianza por color, RunButton con toast (sonner)
+- [x] Reportes: cards con icono + Select nativo + Button primario con estados de loading
+- [x] Upload: dropzone drag&drop con preview de archivo, toasts para éxito/error
+- [x] Login split-screen: panel indigo con feature bullets a la izquierda, form limpio a la derecha, cuentas demo clickables
+- [x] Mobile: sidebar colapsable con Sheet, layout responsive verificado
+
+**Entrega**: `pnpm dev` → nuevo look en todas las superficies. Typecheck y `pnpm build` verdes. Skills usadas: frontend-design, impeccable (modo Operate), ui-ux-pro-max. Bitácora: pendiente crear `docs/phases/phase-9.md`.
+

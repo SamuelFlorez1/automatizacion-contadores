@@ -2,96 +2,104 @@
 
 import { use, useState } from "react";
 import { useRouter } from "next/navigation";
+import { FileText, Banknote, Loader2, Upload as UploadIcon } from "lucide-react";
+import { toast } from "sonner";
+import { Card, CardBody, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Dropzone } from "@/components/dropzone";
 import { apiPost } from "@/lib/api";
 
 export default function UploadPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
   const router = useRouter();
-  const [msgDoc, setMsgDoc] = useState<string | null>(null);
-  const [msgBank, setMsgBank] = useState<string | null>(null);
+  const [docFile, setDocFile] = useState<File | null>(null);
+  const [bankFile, setBankFile] = useState<File | null>(null);
   const [busy, setBusy] = useState<"doc" | "bank" | null>(null);
 
-  async function onDoc(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const file = (form.elements.namedItem("file") as HTMLInputElement).files?.[0];
+  async function submit(kind: "doc" | "bank") {
+    const file = kind === "doc" ? docFile : bankFile;
     if (!file) return;
-    setBusy("doc");
-    setMsgDoc(null);
+    setBusy(kind);
     try {
       const fd = new FormData();
       fd.append("client_id", id);
       fd.append("file", file);
-      const res = await apiPost("/ingest/upload", fd);
-      setMsgDoc(`OK — documento ${res?.document_id || ""} (${res?.status || "ok"})`);
-      form.reset();
+      const endpoint = kind === "doc" ? "/ingest/upload" : "/bank/upload";
+      const res = await apiPost(endpoint, fd);
+      if (kind === "doc") {
+        toast.success("Documento cargado", {
+          description: `${res?.status || "procesado"} · ${res?.document_id || ""}`,
+        });
+        setDocFile(null);
+      } else {
+        toast.success("Extracto cargado", {
+          description: `${res?.inserted ?? 0} movimientos importados.`,
+        });
+        setBankFile(null);
+      }
       router.refresh();
-    } catch (err) {
-      setMsgDoc(`Error: ${(err as Error).message}`);
-    } finally {
-      setBusy(null);
-    }
-  }
-
-  async function onBank(e: React.FormEvent<HTMLFormElement>) {
-    e.preventDefault();
-    const form = e.currentTarget;
-    const file = (form.elements.namedItem("file") as HTMLInputElement).files?.[0];
-    if (!file) return;
-    setBusy("bank");
-    setMsgBank(null);
-    try {
-      const fd = new FormData();
-      fd.append("client_id", id);
-      fd.append("file", file);
-      const res = await apiPost("/bank/upload", fd);
-      setMsgBank(`OK — ${res?.inserted ?? 0} movimientos cargados.`);
-      form.reset();
-      router.refresh();
-    } catch (err) {
-      setMsgBank(`Error: ${(err as Error).message}`);
+    } catch (e) {
+      toast.error("Falló la carga", { description: (e as Error).message });
     } finally {
       setBusy(null);
     }
   }
 
   return (
-    <div className="grid gap-6 md:grid-cols-2">
-      <form onSubmit={onDoc} className="rounded-md border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-semibold">Cargar documento</h2>
-        <p className="mt-1 text-xs text-neutral-600">
-          Factura XML UBL, PDF o imagen. Se procesa vía extracción (Fase 2).
-        </p>
-        <input
-          type="file"
-          name="file"
-          required
-          accept=".xml,.pdf,.png,.jpg,.jpeg,.webp"
-          className="mt-4 w-full text-sm"
-        />
-        <button
-          disabled={busy === "doc"}
-          className="mt-4 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
-        >
-          {busy === "doc" ? "Subiendo…" : "Subir documento"}
-        </button>
-        {msgDoc && <p className="mt-3 text-xs text-neutral-700">{msgDoc}</p>}
-      </form>
+    <div className="grid gap-4 lg:grid-cols-2">
+      <Card>
+        <CardHeader>
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-brand-50 text-brand-700">
+              <FileText className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle>Cargar documento</CardTitle>
+              <CardDescription>Factura XML UBL, PDF o imagen. Extracción automática.</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <Dropzone
+            accept=".xml,.pdf,.png,.jpg,.jpeg,.webp"
+            hint="XML UBL, PDF, PNG, JPG, WEBP"
+            file={docFile}
+            onFile={setDocFile}
+            disabled={busy !== null}
+          />
+          <Button onClick={() => submit("doc")} disabled={!docFile || busy !== null} className="w-full">
+            {busy === "doc" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadIcon className="h-4 w-4" />}
+            {busy === "doc" ? "Procesando…" : "Subir documento"}
+          </Button>
+        </CardBody>
+      </Card>
 
-      <form onSubmit={onBank} className="rounded-md border border-neutral-200 bg-white p-4">
-        <h2 className="text-sm font-semibold">Cargar extracto bancario</h2>
-        <p className="mt-1 text-xs text-neutral-600">
-          CSV con columnas normalizadas (fecha, descripción, monto, ref).
-        </p>
-        <input type="file" name="file" required accept=".csv" className="mt-4 w-full text-sm" />
-        <button
-          disabled={busy === "bank"}
-          className="mt-4 rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
-        >
-          {busy === "bank" ? "Subiendo…" : "Subir CSV"}
-        </button>
-        {msgBank && <p className="mt-3 text-xs text-neutral-700">{msgBank}</p>}
-      </form>
+      <Card>
+        <CardHeader>
+          <div className="flex items-start gap-3">
+            <div className="flex h-10 w-10 items-center justify-center rounded-[10px] bg-brand-50 text-brand-700">
+              <Banknote className="h-5 w-5" />
+            </div>
+            <div>
+              <CardTitle>Cargar extracto bancario</CardTitle>
+              <CardDescription>CSV normalizado: fecha, descripción, monto, referencia.</CardDescription>
+            </div>
+          </div>
+        </CardHeader>
+        <CardBody className="space-y-4">
+          <Dropzone
+            accept=".csv"
+            hint="Archivo CSV con columnas normalizadas"
+            file={bankFile}
+            onFile={setBankFile}
+            disabled={busy !== null}
+          />
+          <Button onClick={() => submit("bank")} disabled={!bankFile || busy !== null} className="w-full">
+            {busy === "bank" ? <Loader2 className="h-4 w-4 animate-spin" /> : <UploadIcon className="h-4 w-4" />}
+            {busy === "bank" ? "Importando…" : "Subir CSV"}
+          </Button>
+        </CardBody>
+      </Card>
     </div>
   );
 }

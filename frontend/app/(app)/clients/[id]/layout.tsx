@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import { ArrowLeft, FileText, Banknote, FileBarChart2, Upload } from "lucide-react";
 import { createClient } from "@/lib/supabase/server";
+import { RegimenBadge } from "@/components/status-badge";
+import { cn } from "@/lib/utils";
+import { ClientTabsClient } from "./_client-tabs";
 
 export default async function ClientLayout({
   children,
@@ -13,42 +17,45 @@ export default async function ClientLayout({
   const supabase = await createClient();
   const { data: client } = await supabase
     .from("clients")
-    .select("id, legal_name, nit, tax_regime, ica_city")
+    .select("id, legal_name, trade_name, nit, tax_regime, ica_city")
     .eq("id", id)
     .maybeSingle();
 
   if (!client) notFound();
 
-  const tabs = [
-    { href: `/clients/${id}`, label: "Resumen" },
-    { href: `/clients/${id}/reconciliation`, label: "Conciliación" },
-    { href: `/clients/${id}/reports`, label: "Reportes" },
-    { href: `/clients/${id}/upload`, label: "Cargar" },
-  ];
-
   return (
-    <div>
-      <div className="mb-6">
-        <Link href="/clients" className="text-xs text-neutral-500 hover:underline">
-          ← Clientes
-        </Link>
-        <h1 className="mt-1 text-xl font-semibold">{client.legal_name}</h1>
-        <p className="text-sm text-neutral-600">
-          NIT {client.nit} · Régimen {client.tax_regime} · {client.ica_city || "—"}
-        </p>
+    <div className="mx-auto max-w-7xl">
+      <Link
+        href="/clients"
+        className="inline-flex items-center gap-1 text-xs font-medium text-ink-subtle hover:text-ink"
+      >
+        <ArrowLeft className="h-3.5 w-3.5" />
+        Todos los clientes
+      </Link>
+
+      <div className="mt-4 flex flex-wrap items-start justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight text-ink">{client.legal_name}</h1>
+          {client.trade_name && <p className="mt-0.5 text-sm text-ink-subtle">{client.trade_name}</p>}
+          <div className="mt-3 flex flex-wrap items-center gap-2 text-xs text-ink-muted">
+            <RegimenBadge regime={client.tax_regime} />
+            <span className="text-ink-subtle">·</span>
+            <span>
+              NIT <span className="font-mono tabular-nums text-ink">{client.nit}</span>
+            </span>
+            {client.ica_city && (
+              <>
+                <span className="text-ink-subtle">·</span>
+                <span>{client.ica_city}</span>
+              </>
+            )}
+          </div>
+        </div>
       </div>
-      <nav className="mb-6 flex gap-1 border-b border-neutral-200 text-sm">
-        {tabs.map((t) => (
-          <Link
-            key={t.href}
-            href={t.href}
-            className="border-b-2 border-transparent px-3 py-2 text-neutral-600 hover:border-neutral-300 hover:text-neutral-900"
-          >
-            {t.label}
-          </Link>
-        ))}
-      </nav>
-      {children}
+
+      <ClientTabsClient clientId={id} />
+
+      <div className="mt-6">{children}</div>
     </div>
   );
 }

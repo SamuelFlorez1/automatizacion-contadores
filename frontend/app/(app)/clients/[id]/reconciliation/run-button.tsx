@@ -2,38 +2,37 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { Play, Loader2 } from "lucide-react";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import { apiPost } from "@/lib/api";
 
 export function RunReconcileButton({ clientId }: { clientId: string }) {
   const router = useRouter();
-  const [loading, setLoading] = useState(false);
-  const [msg, setMsg] = useState<string | null>(null);
+  const [busy, setBusy] = useState(false);
 
-  async function run() {
-    setLoading(true);
-    setMsg(null);
+  async function onClick() {
+    setBusy(true);
     try {
       const res = await apiPost(`/bank/reconcile/${clientId}`);
-      const matched = (res?.exact ?? 0) + (res?.fuzzy ?? 0) + (res?.transfer ?? 0);
-      setMsg(`OK — ${matched} matches, ${res?.review ?? 0} en revisión, ${res?.unmatched ?? 0} sin conciliar.`);
+      const matched = res?.matched_count ?? res?.matches?.length ?? 0;
+      toast.success("Conciliación completada", {
+        description: `${matched} match${matched === 1 ? "" : "es"} generados.`,
+      });
       router.refresh();
     } catch (e) {
-      setMsg(`Error: ${(e as Error).message}`);
+      toast.error("No se pudo correr el motor", {
+        description: (e as Error).message,
+      });
     } finally {
-      setLoading(false);
+      setBusy(false);
     }
   }
 
   return (
-    <div className="flex items-center gap-3">
-      {msg && <span className="text-xs text-neutral-600">{msg}</span>}
-      <button
-        onClick={run}
-        disabled={loading}
-        className="rounded-md bg-neutral-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-neutral-800 disabled:opacity-60"
-      >
-        {loading ? "Conciliando…" : "Correr conciliación"}
-      </button>
-    </div>
+    <Button onClick={onClick} disabled={busy} variant="primary" size="md">
+      {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : <Play className="h-4 w-4" />}
+      {busy ? "Corriendo…" : "Correr motor"}
+    </Button>
   );
 }

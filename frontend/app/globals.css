@@ -1,3 +1,96 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  :root {
+    /* Brand: indigo scale. HSL to keep opacity variants easy. */
+    --brand-50: 238 100% 97%;
+    --brand-100: 239 100% 94%;
+    --brand-200: 239 93% 88%;
+    --brand-400: 239 84% 67%;
+    --brand-500: 239 84% 60%;
+    --brand-600: 239 84% 54%;   /* #4f46e5 */
+    --brand-700: 239 74% 46%;
+    --brand-900: 239 64% 30%;
+
+    --surface: 0 0% 99%;         /* app bg */
+    --surface-card: 0 0% 100%;   /* card bg */
+    --surface-sunken: 240 5% 96%;
+
+    --border: 240 6% 90%;
+    --border-strong: 240 5% 84%;
+
+    --text: 240 10% 4%;
+    --text-muted: 240 4% 32%;
+    --text-subtle: 240 4% 46%;
+    --text-inverted: 0 0% 100%;
+
+    --success: 158 64% 40%;      /* emerald-600 */
+    --success-soft: 152 76% 94%;
+    --success-fg: 158 64% 25%;
+
+    --warning: 32 95% 44%;       /* amber-600 */
+    --warning-soft: 45 96% 90%;
+    --warning-fg: 26 88% 28%;
+
+    --danger: 0 72% 51%;         /* red-600 */
+    --danger-soft: 0 93% 94%;
+    --danger-fg: 0 74% 35%;
+
+    --radius: 0.625rem;
+  }
+
+  [data-theme="dark"] {
+    --surface: 240 10% 4%;
+    --surface-card: 240 6% 10%;
+    --surface-sunken: 240 6% 8%;
+    --border: 240 5% 18%;
+    --border-strong: 240 5% 24%;
+    --text: 0 0% 98%;
+    --text-muted: 240 5% 70%;
+    --text-subtle: 240 4% 56%;
+    --text-inverted: 240 10% 4%;
+    --brand-50: 239 40% 16%;
+    --brand-100: 239 40% 22%;
+    --success-soft: 158 40% 14%;
+    --warning-soft: 32 40% 14%;
+    --danger-soft: 0 40% 16%;
+  }
+
+  * {
+    border-color: hsl(var(--border));
+  }
+
+  html {
+    -webkit-text-size-adjust: 100%;
+    text-rendering: optimizeLegibility;
+  }
+
+  body {
+    background-color: hsl(var(--surface));
+    color: hsl(var(--text));
+    font-feature-settings: "cv11", "ss01", "ss03";
+    font-synthesis: none;
+  }
+
+  /* Focus discipline: indigo ring 2px with offset */
+  :where(button, a, input, textarea, select, [role="button"], [role="tab"], [tabindex]):focus-visible {
+    outline: 2px solid hsl(var(--brand-600));
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Tabular numerics for money / metrics */
+  .tabnum {
+    font-variant-numeric: tabular-nums;
+    font-feature-settings: "tnum" 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      transition-duration: 0.01ms !important;
+    }
+  }
+}
